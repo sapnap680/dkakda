@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>出勤記録</title>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9quxnuJ9te8sbT8L8zUzAkRLYhEgfS8o"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "メイリオ", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: #333;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .subtitle a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .subtitle a:hover {
+      text-decoration: underline;
+    }
+    #locationStatus {
+      padding: 15px;
+      margin-bottom: 25px;
+      border-radius: 10px;
+      font-weight: bold;
+      text-align: center;
+      font-size: 16px;
+    }
+    .location-ok {
+      background-color: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    .location-ng {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+    label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #333;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      font-size: 18px;
+      margin-bottom: 20px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .error-message {
+      color: #f44336;
+      font-size: 14px;
+      margin-top: -15px;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .error-message.show {
+      display: block;
+    }
+    input[type="radio"] {
+      transform: scale(1.5);
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .radio-group {
+      margin-bottom: 25px;
+    }
+    .radio-label {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    .radio-label:hover {
+      background-color: #f0f0f0;
+    }
+    .radio-label input:checked + span {
+      color: #667eea;
+    }
+    .radio-label input:checked {
+      accent-color: #667eea;
+    }
+    button {
+      width: 100%;
+      padding: 18px;
+      font-size: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .success-message {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+      border: 2px solid #c3e6cb;
+    }
+    .success-message.show {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 出勤記録</h1>
+    <div class="subtitle">
+      管理画面は<a href="admin.html">こちら</a>
+    </div>
+    
+    <div id="locationStatus"></div>
+    
+    <form id="attendanceForm">
+      <label for="personName">氏名:</label>
+      <input type="text" id="personName" placeholder="氏名を入力してください" required autocomplete="off">
+      <div class="error-message" id="nameError">この名前は登録されていません</div>
+
+      <div class="radio-group">
+        <label>交通経路:</label>
+        <label class="radio-label">
+          <input type="radio" name="route" value="家→事務所" required>
+          <span>🏠 家 → 事務所</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="route" value="学校→事務所">
+          <span>🏫 学校 → 事務所</span>
+        </label>
+      </div>
+
+      <button type="submit" id="submitBtn">出勤を記録</button>
+    </form>
+
+    <div class="success-message" id="successMessage">
+      ✓ 出勤を記録しました！
+    </div>
+  </div>
+
+  <script>
+    // Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCSI2kDqV7eMPqwBh0nNDORdGtw5aydQ",
+      authDomain: "kdaikda.firebaseapp.com",
+      projectId: "kdaikda",
+      storageBucket: "kdaikda.firebasestorage.app",
+      messagingSenderId: "640889239505",
+      appId: "1:640889239505:web:993aa3aba77560837f12f0"
+    };
+
+    // Firebase初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const TARGET_LAT = 35.6555726;
+    const TARGET_LNG = 139.6994542;
+    const DISTANCE_LIMIT = 200;
+    const DISTANCE_BUFFER = 5; // バッファ
+
+    let people = [];
+    let currentPosition = null;
+
+    // 統一された日付フォーマット関数
+    function getDateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}/${m}/${d}`;
+    }
+
+    // 統一された時刻フォーマット関数
+    function getTimeString(date) {
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    // データ読み込み
+    async function loadData() {
+      try {
+        const peopleSnapshot = await db.collection('people').get();
+        people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+      }
+    }
+
+    // 距離計算
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371000;
+      const rad1 = lat1 * Math.PI / 180;
+      const rad2 = lat2 * Math.PI / 180;
+      const deltaLat = (lat2 - lat1) * Math.PI / 180;
+      const deltaLon = (lon2 - lon1) * Math.PI / 180;
+      
+      const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(rad1) * Math.cos(rad2) * Math.sin(deltaLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      
+      return R * c;
+    }
+
+    // 位置情報チェック
+    function checkLocation() {
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          currentPosition = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+
+          const distance = getDistance(TARGET_LAT, TARGET_LNG, currentPosition.lat, currentPosition.lng);
+          const status = document.getElementById('locationStatus');
+          
+          if (distance <= DISTANCE_LIMIT) {
+            status.className = 'location-ok';
+            status.textContent = `✓ 位置情報OK（距離: ${Math.round(distance)}m）`;
+          } else {
+            status.className = 'location-ng';
+            status.textContent = `✗ 位置情報NG（距離: ${Math.round(distance)}m - 200m以内に移動してください）`;
+          }
+        },
+        function() {
+          const status = document.getElementById('locationStatus');
+          status.className = 'location-ng';
+          status.textContent = '位置情報の取得に失敗しました';
+        }
+      );
+    }
+
+    checkLocation();
+    setInterval(checkLocation, 5000);
+
+    // 名前バリデーション
+    document.getElementById('personName').addEventListener('input', function() {
+      document.getElementById('nameError').classList.remove('show');
+    });
+
+    // 出勤記録
+    document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const nameInput = document.getElementById('personName').value.trim();
+      const nameError = document.getElementById('nameError');
+      const successMessage = document.getElementById('successMessage');
+
+      // 登録されているか確認
+      const person = people.find(p => p.name === nameInput);
+      
+      if (!person) {
+        nameError.classList.add('show');
+        document.getElementById('personName').focus();
+        return;
+      }
+
+      if (!currentPosition) {
+        alert('位置情報を取得できません');
+        return;
+      }
+
+      const distance = getDistance(TARGET_LAT, TARGET_LNG, currentPosition.lat, currentPosition.lng);
+      
+      if (distance > DISTANCE_LIMIT + DISTANCE_BUFFER) {
+        alert(`位置情報の距離が${Math.round(distance)}mです。${DISTANCE_LIMIT}m以内に移動してください。`);
+        return;
+      }
+
+      const route = document.querySelector('input[name="route"]:checked').value;
+      const now = new Date();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '記録中...';
+
+      try {
+        const recordData = {
+          personId: person.id,
+          personName: person.name,
+          route: route,
+          date: getDateString(now),
+          time: getTimeString(now),
+          lat: currentPosition.lat,
+          lng: currentPosition.lng,
+          distance: distance,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('records').add(recordData);
+
+        // 成功メッセージ表示
+        successMessage.classList.add('show');
+        this.reset();
+
+        // 3秒後に成功メッセージを非表示
+        setTimeout(() => {
+          successMessage.classList.remove('show');
+        }, 3000);
+      } catch (error) {
+        console.error('記録エラー:', error);
+        alert('記録に失敗しました');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '出勤を記録';
+      }
+    });
+
+    // 初期化
+    loadData();
+  </script>
+</body>
+</html>
