@@ -425,14 +425,53 @@
         font-weight: bold;
         white-space: nowrap;
         margin: 0 !important;
-        color: #1e3a8a !important;
+        color: #0e7490 !important;
+        background-color: rgba(6, 182, 212, 0.1) !important;
+        padding: 1.5mm 2mm !important;
+        border-radius: 1.5mm;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       .summary-value {
-        font-size: 12pt !important;
-        font-weight: bold;
+        font-size: 10pt !important;
+        font-weight: normal;
         text-align: right;
         margin: 0 !important;
-        color: #000000 !important;
+        color: #1f2937 !important;
+      }
+      /* 合計セクション */
+      .total-section {
+        page-break-inside: avoid !important;
+        margin-top: 3mm !important;
+        margin-bottom: 0 !important;
+        padding: 3mm 4mm !important;
+        background: linear-gradient(135deg, #0891b2, #06b6d4) !important;
+        border-radius: 3mm;
+        display: flex !important;
+        justify-content: space-around !important;
+        gap: 5mm !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .total-item {
+        text-align: center;
+        flex: 1;
+      }
+      .total-label {
+        font-size: 10pt !important;
+        font-weight: bold;
+        color: white !important;
+        margin-bottom: 2mm !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .total-value {
+        font-size: 16pt !important;
+        font-weight: bold;
+        color: white !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
     }
 
@@ -590,15 +629,47 @@
     }
     .summary-label {
       font-size: 13px;
-      color: #1e3a8a;
-      font-weight: 600;
+      color: #0e7490;
+      font-weight: bold;
       white-space: nowrap;
+      background-color: rgba(6, 182, 212, 0.1);
+      padding: 8px 12px !important;
+      border-radius: 6px;
     }
     .summary-value {
       font-size: 16px;
-      font-weight: bold;
-      color: #000000;
+      font-weight: normal;
+      color: #1f2937;
       text-align: right;
+    }
+    /* 合計セクション */
+    .total-section {
+      margin-top: 20px;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-around;
+      gap: 24px;
+      box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+    }
+    .total-item {
+      text-align: center;
+      flex: 1;
+    }
+    .total-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .total-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -1148,12 +1219,12 @@
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
-                <th class="px-6 py-3 text-left font-bold">氏名</th>
-                <th class="px-6 py-3 text-center font-bold">家→事務所</th>
-                <th class="px-6 py-3 text-center font-bold">学校→事務所</th>
-                <th class="px-6 py-3 text-center font-bold">合計出勤</th>
-                <th class="px-6 py-3 text-right font-bold">交通費合計</th>
+              <tr class="bg-gray-100 border-b-2 border-gray-300">
+                <th class="px-6 py-3 text-left font-bold text-black">氏名</th>
+                <th class="px-6 py-3 text-center font-bold text-black">家→事務所</th>
+                <th class="px-6 py-3 text-center font-bold text-black">学校→事務所</th>
+                <th class="px-6 py-3 text-center font-bold text-black">合計出勤</th>
+                <th class="px-6 py-3 text-right font-bold text-black">交通費合計</th>
               </tr>
             </thead>
             <tbody>
@@ -1329,12 +1400,17 @@
                   <div class="summary-label">小計</div>
                   <div class="summary-value">¥${(person.universityFare * schoolCount).toLocaleString()}</div>
                 </div>
-                <div class="summary-row">
-                  <div class="summary-label">合計出勤日数</div>
-                  <div class="summary-value">${personRecords.length}日</div>
-                  <div class="summary-label">交通費合計</div>
-                  <div class="summary-value">¥${totalFare.toLocaleString()}</div>
-                </div>
+              </div>
+            </div>
+
+            <div class="total-section">
+              <div class="total-item">
+                <div class="total-label">合計出勤日数</div>
+                <div class="total-value">${personRecords.length}日</div>
+              </div>
+              <div class="total-item">
+                <div class="total-label">交通費合計</div>
+                <div class="total-value">¥${totalFare.toLocaleString()}</div>
               </div>
             </div>
           </div>
