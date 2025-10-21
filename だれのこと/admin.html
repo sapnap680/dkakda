@@ -375,45 +375,50 @@
       }
       /* 集計セクション */
       .summary-section {
-        page-break-inside: avoid;
-        margin-top: 0.5mm;
-        padding: 0.5mm;
-        background-color: #f5f5f5;
-        border: 0.5px solid #999;
+        page-break-inside: avoid !important;
+        margin-top: 0.5mm !important;
+        margin-bottom: 0 !important;
+        padding: 0.5mm !important;
+        background-color: #f5f5f5 !important;
+        border: 0.5px solid #999 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-section h3 {
-        font-size: 7pt;
-        margin: 0 0 0.5mm 0;
+        font-size: 7pt !important;
+        margin: 0 0 0.5mm 0 !important;
         font-weight: bold;
-        border: none;
+        border: none !important;
       }
       .summary-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3mm;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.3mm !important;
+        margin: 0 !important;
       }
       .summary-row {
-        display: grid;
-        grid-template-columns: auto 1fr auto 1fr;
-        gap: 1.5mm;
-        align-items: center;
-        padding: 0.5mm 1mm;
-        border: 0.3px solid #999;
-        background-color: white;
+        display: grid !important;
+        grid-template-columns: auto 1fr auto 1fr !important;
+        gap: 1.5mm !important;
+        align-items: center !important;
+        padding: 0.5mm 1mm !important;
+        margin: 0 !important;
+        border: 0.3px solid #999 !important;
+        background-color: white !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-label {
-        font-size: 5.5pt;
+        font-size: 5.5pt !important;
         font-weight: bold;
         white-space: nowrap;
+        margin: 0 !important;
       }
       .summary-value {
-        font-size: 7pt;
+        font-size: 7pt !important;
         font-weight: bold;
         text-align: right;
+        margin: 0 !important;
       }
     }
 
