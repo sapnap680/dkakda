@@ -204,14 +204,15 @@
     /* 印刷用スタイル */
     @media print {
       @page {
-        size: A4;
-        margin: 5mm 8mm;
+        size: A4 portrait;
+        margin: 8mm 8mm;
       }
       body {
         background: white !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 6pt;
+        font-size: 10pt;
+        line-height: 1.5;
       }
       /* ナビゲーションと装飾要素を非表示 */
       body > div:nth-child(1),
@@ -278,6 +279,8 @@
         box-shadow: none;
         width: 100%;
         min-height: 0;
+        transform: scale(1.02);
+        transform-origin: top center;
       }
       .print-page:last-child {
         page-break-after: avoid !important;
@@ -287,81 +290,82 @@
       }
       /* レポートヘッダー */
       .report-header {
-        margin-bottom: 0.5mm !important;
-        border-bottom: 1px solid #333;
-        padding-bottom: 0.3mm !important;
+        margin-bottom: 2mm !important;
+        border-bottom: 2px solid #333;
+        padding-bottom: 1mm !important;
         text-align: center;
       }
       .report-header h2 {
-        font-size: 9pt !important;
+        font-size: 18pt !important;
         margin: 0 !important;
         font-weight: bold;
         border: none;
       }
       .report-header .month {
-        font-size: 7.5pt !important;
-        margin: 0 !important;
+        font-size: 14pt !important;
+        margin: 0.5mm 0 !important;
       }
       /* 従業員情報 */
       .employee-info {
-        margin-bottom: 0.5mm !important;
-        padding: 0.3mm !important;
+        margin-bottom: 2mm !important;
+        padding: 2mm !important;
         background-color: #f5f5f5;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .employee-info table {
-        font-size: 5.5pt !important;
+        font-size: 10pt !important;
         width: 100%;
         border: none;
       }
       .employee-info td {
-        padding: 0.2mm 0.8mm !important;
-        line-height: 1.1 !important;
+        padding: 1.5mm 2mm !important;
+        line-height: 1.4 !important;
         border: none;
       }
       .employee-info td:first-child {
-        width: 45px;
+        width: 80px;
         font-weight: bold;
       }
       /* カレンダー */
       .calendar-container {
-        margin-top: 0.5mm !important;
-        margin-bottom: 0 !important;
+        margin-top: 2mm !important;
+        margin-bottom: 2mm !important;
       }
       .calendar-title {
-        font-size: 7pt !important;
-        margin-bottom: 0.3mm !important;
+        font-size: 11pt !important;
+        margin-bottom: 1.5mm !important;
         font-weight: bold;
       }
       .calendar {
-        font-size: 5pt !important;
-        margin-bottom: 0.5mm !important;
+        font-size: 9pt !important;
+        margin-bottom: 0 !important;
         width: 100%;
         border-collapse: collapse;
       }
       .calendar th {
-        padding: 0.5mm;
-        font-size: 5.5pt;
+        padding: 2mm;
+        font-size: 9pt !important;
         background-color: #ddd !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        border: 0.3px solid #999;
+        border: 0.5px solid #999;
       }
       .calendar td {
-        padding: 0.2mm !important;
-        height: 10px !important;
+        padding: 2mm !important;
+        height: 35px !important;
         vertical-align: middle;
         text-align: center;
-        border: 0.3px solid #ccc;
+        border: 0.5px solid #ccc;
+        position: relative;
       }
       .calendar .day-number {
-        font-size: 5.5pt !important;
+        font-size: 9pt !important;
         font-weight: bold;
       }
       .calendar .attendance-mark {
-        font-size: 14px !important;
-        line-height: 0.5 !important;
+        font-size: 40px !important;
+        line-height: 1 !important;
         position: absolute;
         top: 50%;
         left: 50%;
@@ -380,46 +384,48 @@
       /* 集計セクション */
       .summary-section {
         page-break-inside: avoid !important;
-        margin-top: 0.5mm !important;
+        margin-top: 3mm !important;
         margin-bottom: 0 !important;
-        padding: 0.5mm !important;
+        padding: 3mm !important;
         background-color: #f5f5f5 !important;
-        border: 0.5px solid #999 !important;
+        border: 2px solid #4CAF50 !important;
+        border-radius: 3mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-section h3 {
-        font-size: 7pt !important;
-        margin: 0 0 0.5mm 0 !important;
+        font-size: 14pt !important;
+        margin: 0 0 2mm 0 !important;
         font-weight: bold;
         border: none !important;
       }
       .summary-list {
         display: flex !important;
         flex-direction: column !important;
-        gap: 0.3mm !important;
+        gap: 2mm !important;
         margin: 0 !important;
       }
       .summary-row {
         display: grid !important;
         grid-template-columns: auto 1fr auto 1fr !important;
-        gap: 1.5mm !important;
+        gap: 4mm !important;
         align-items: center !important;
-        padding: 0.5mm 1mm !important;
+        padding: 2mm 3mm !important;
         margin: 0 !important;
-        border: 0.3px solid #999 !important;
+        border: 1px solid #999 !important;
         background-color: white !important;
+        border-radius: 2mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-label {
-        font-size: 5.5pt !important;
+        font-size: 10pt !important;
         font-weight: bold;
         white-space: nowrap;
         margin: 0 !important;
       }
       .summary-value {
-        font-size: 7pt !important;
+        font-size: 14pt !important;
         font-weight: bold;
         text-align: right;
         margin: 0 !important;
