@@ -191,6 +191,10 @@
 
     /* 印刷用スタイル */
     @media print {
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
       body {
         background-color: white;
         padding: 0;
@@ -205,48 +209,111 @@
         margin: 0;
         padding: 0;
       }
+      .container:not(#monthly) {
+        display: none !important;
+      }
       .section {
         box-shadow: none;
+        padding: 0;
+        margin: 0;
+      }
+      #monthlyReportContent {
+        margin: 0;
         padding: 0;
       }
       .print-page {
         page-break-after: always;
         page-break-inside: avoid;
-        padding: 10mm;
+        padding: 0;
         margin: 0;
         box-shadow: none;
         max-width: 100%;
         width: 100%;
+        min-height: 0;
       }
       .print-page:last-child {
         page-break-after: auto;
       }
       /* レポートヘッダー */
       .report-header {
-        margin-bottom: 10mm;
+        margin-bottom: 5mm;
         border-bottom: 2px solid #333;
+        padding-bottom: 3mm;
       }
-      /* カレンダー */
-      .calendar {
+      .report-header h2 {
+        font-size: 20pt;
+        margin: 0;
+      }
+      .report-header .month {
+        font-size: 16pt;
+      }
+      /* 従業員情報 */
+      .employee-info {
+        margin-bottom: 5mm;
+        padding: 3mm;
+      }
+      .employee-info table {
         font-size: 10pt;
       }
-      .calendar th, .calendar td {
-        padding: 4mm;
+      .employee-info td {
+        padding: 2mm;
+      }
+      /* カレンダー */
+      .calendar-container {
+        margin-top: 3mm;
+      }
+      .calendar-title {
+        font-size: 12pt;
+        margin-bottom: 2mm;
+      }
+      .calendar {
+        font-size: 9pt;
+        margin-bottom: 3mm;
+      }
+      .calendar th {
+        padding: 2mm;
+      }
+      .calendar td {
+        padding: 1mm;
+        height: auto;
+      }
+      .calendar .day-number {
+        font-size: 10pt;
+      }
+      .calendar .attendance-mark {
+        font-size: 24px;
       }
       /* 集計セクション */
       .summary-section {
         page-break-inside: avoid;
+        margin-top: 3mm;
+        padding: 3mm;
+      }
+      .summary-section h3 {
+        font-size: 14pt;
+        margin: 0 0 2mm 0;
+      }
+      .summary-grid {
+        gap: 2mm;
+      }
+      .summary-item {
+        padding: 2mm;
+      }
+      .summary-label {
+        font-size: 10pt;
+      }
+      .summary-value {
+        font-size: 18pt;
       }
     }
 
-    /* 月次レポート用スタイル */
+    /* 月次レポート用スタイル（画面表示用） */
     .print-page {
       background: white;
       margin: 20px auto;
       padding: 20px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       max-width: 210mm;
-      min-height: 297mm; /* A4高さ */
     }
     .report-header {
       text-align: center;
