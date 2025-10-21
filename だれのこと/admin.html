@@ -205,25 +205,57 @@
     @media print {
       @page {
         size: A4;
-        margin: 10mm 12mm;
+        margin: 8mm 10mm;
       }
       body {
-        background-color: white;
-        padding: 0;
-        margin: 0;
-        font-size: 10pt;
+        background: white !important;
+        background-color: white !important;
+        background-image: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        font-size: 9pt;
       }
-      .top-bar, .header, .no-print {
+      /* 全ての要素を非表示にして、レポートコンテンツだけ表示 */
+      body > * {
         display: none !important;
       }
-      .container {
+      /* 月次レポートコンテンツのみ表示 */
+      #monthly,
+      #monthly #monthlyReportContent {
         display: block !important;
-        max-width: none;
-        margin: 0;
-        padding: 0;
+        background: white !important;
+        background-image: none !important;
+        max-width: none !important;
       }
-      .container:not(#monthly) {
+      #monthly {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #monthly #monthlyReportContent {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      /* no-printクラスの要素を非表示 */
+      #monthly > *:not(#monthlyReportContent) {
         display: none !important;
+      }
+      /* テーブル要素は適切に表示 */
+      #monthlyReportContent table {
+        display: table !important;
+        border-collapse: collapse;
+      }
+      #monthlyReportContent thead {
+        display: table-header-group !important;
+      }
+      #monthlyReportContent tbody {
+        display: table-row-group !important;
+      }
+      #monthlyReportContent tr {
+        display: table-row !important;
+      }
+      #monthlyReportContent th,
+      #monthlyReportContent td {
+        display: table-cell !important;
       }
       .section {
         box-shadow: none;
@@ -251,91 +283,92 @@
       }
       /* レポートヘッダー */
       .report-header {
-        margin-bottom: 3mm;
-        border-bottom: 2px solid #333;
-        padding-bottom: 2mm;
+        margin-bottom: 2mm;
+        border-bottom: 1.5px solid #333;
+        padding-bottom: 1.5mm;
       }
       .report-header h2 {
-        font-size: 16pt;
+        font-size: 14pt;
         margin: 0;
         font-weight: bold;
       }
       .report-header .month {
-        font-size: 13pt;
-        margin-top: 1mm;
+        font-size: 11pt;
+        margin-top: 0.5mm;
       }
       /* 従業員情報 */
       .employee-info {
-        margin-bottom: 3mm;
-        padding: 2mm;
+        margin-bottom: 2mm;
+        padding: 1.5mm;
         background-color: #f5f5f5;
       }
       .employee-info table {
-        font-size: 9pt;
+        font-size: 8pt;
         width: 100%;
       }
       .employee-info td {
-        padding: 1mm 2mm;
+        padding: 0.5mm 1.5mm;
       }
       .employee-info td:first-child {
-        width: 100px;
+        width: 90px;
         font-weight: bold;
       }
       /* カレンダー */
       .calendar-container {
-        margin-top: 2mm;
+        margin-top: 1.5mm;
       }
       .calendar-title {
-        font-size: 11pt;
-        margin-bottom: 1mm;
+        font-size: 10pt;
+        margin-bottom: 0.5mm;
         font-weight: bold;
       }
       .calendar {
-        font-size: 8pt;
-        margin-bottom: 2mm;
+        font-size: 7pt;
+        margin-bottom: 1.5mm;
         width: 100%;
+        border-collapse: collapse;
       }
       .calendar th {
-        padding: 1mm;
-        font-size: 8pt;
+        padding: 0.5mm;
+        font-size: 7pt;
       }
       .calendar td {
-        padding: 0.5mm;
-        height: 20px;
+        padding: 0.3mm;
+        height: 18px;
         vertical-align: middle;
       }
       .calendar .day-number {
-        font-size: 9pt;
+        font-size: 8pt;
       }
       .calendar .attendance-mark {
-        font-size: 20px;
+        font-size: 16px;
         line-height: 1;
       }
       /* 集計セクション */
       .summary-section {
         page-break-inside: avoid;
-        margin-top: 2mm;
-        padding: 2mm;
+        margin-top: 1.5mm;
+        padding: 1.5mm;
       }
       .summary-section h3 {
-        font-size: 12pt;
-        margin: 0 0 2mm 0;
+        font-size: 11pt;
+        margin: 0 0 1.5mm 0;
         font-weight: bold;
       }
       .summary-grid {
-        gap: 2mm;
+        gap: 1.5mm;
         display: grid;
         grid-template-columns: 1fr 1fr;
       }
       .summary-item {
-        padding: 2mm;
+        padding: 1.5mm;
       }
       .summary-label {
-        font-size: 9pt;
-        margin-bottom: 1mm;
+        font-size: 8pt;
+        margin-bottom: 0.5mm;
       }
       .summary-value {
-        font-size: 16pt;
+        font-size: 14pt;
         font-weight: bold;
       }
     }
