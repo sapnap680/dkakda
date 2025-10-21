@@ -237,6 +237,7 @@
     const DISTANCE_BUFFER = 5; // バッファ
 
     let people = [];
+    let records = [];
     let currentPosition = null;
 
     // 統一された日付フォーマット関数
@@ -260,6 +261,13 @@
       try {
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // 本日の出勤記録を取得
+        const today = getDateString(new Date());
+        const recordsSnapshot = await db.collection('records')
+          .where('date', '==', today)
+          .get();
+        records = recordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       } catch (error) {
         console.error('データ読み込みエラー:', error);
       }
@@ -334,6 +342,17 @@
         return;
       }
 
+      // 本日既に記録済みかチェック
+      const today = getDateString(new Date());
+      const alreadyRecorded = records.some(r => 
+        r.personId === person.id && r.date === today
+      );
+
+      if (alreadyRecorded) {
+        alert('本日の出勤は既に記録されています。1日1回のみ記録できます。');
+        return;
+      }
+
       if (!currentPosition) {
         alert('位置情報を取得できません');
         return;
@@ -367,6 +386,9 @@
         };
 
         await db.collection('records').add(recordData);
+
+        // ローカルのrecordsにも追加
+        records.push({ id: Date.now(), ...recordData });
 
         // 成功メッセージ表示
         successMessage.classList.add('show');

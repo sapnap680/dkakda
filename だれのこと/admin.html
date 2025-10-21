@@ -103,7 +103,7 @@
       margin-bottom: 8px;
       font-weight: bold;
     }
-    input[type="text"], input[type="number"], select {
+    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
       width: 100%;
       padding: 10px;
       font-size: 16px;
@@ -342,6 +342,7 @@
 
   <div class="header">
     <button class="tab-button active" onclick="switchTab('today')">本日の出勤</button>
+    <button class="tab-button" onclick="switchTab('manual')">手動記録</button>
     <button class="tab-button" onclick="switchTab('management')">人員管理</button>
     <button class="tab-button" onclick="switchTab('stats')">統計</button>
     <button class="tab-button" onclick="switchTab('monthly')">月次レポート</button>
@@ -352,6 +353,41 @@
     <div class="section">
       <h2>本日の出勤状況</h2>
       <div id="todayStats"></div>
+    </div>
+  </div>
+
+  <!-- 手動記録タブ -->
+  <div id="manual" class="container active full">
+    <div class="section">
+      <h2>手動で出勤記録を追加</h2>
+      <p style="color: #666; margin-bottom: 20px;">※ 管理者用：場所・回数制限なしで記録を追加できます</p>
+      
+      <form id="manualRecordForm">
+        <label for="manualPersonSelect">氏名:</label>
+        <select id="manualPersonSelect" required>
+          <option value="">--- 選択してください ---</option>
+        </select>
+
+        <label for="manualDate">日付:</label>
+        <input type="date" id="manualDate" required>
+
+        <label for="manualTime">時刻:</label>
+        <input type="time" id="manualTime" required>
+
+        <label>交通経路:</label>
+        <div style="margin-bottom: 15px;">
+          <label style="display: inline-flex; align-items: center; margin-right: 20px;">
+            <input type="radio" name="manualRoute" value="家→事務所" required style="margin-right: 8px;">
+            家→事務所
+          </label>
+          <label style="display: inline-flex; align-items: center;">
+            <input type="radio" name="manualRoute" value="学校→事務所" style="margin-right: 8px;">
+            学校→事務所
+          </label>
+        </div>
+
+        <button type="submit" id="manualSubmitBtn">記録を追加</button>
+      </form>
     </div>
   </div>
 
@@ -482,7 +518,23 @@
         case 'monthly':
           populateMonthSelect();
           break;
+        case 'manual':
+          updateManualForm();
+          break;
       }
+    }
+
+    // 手動記録フォーム更新
+    function updateManualForm() {
+      const select = document.getElementById('manualPersonSelect');
+      const options = '<option value="">--- 選択してください ---</option>' + 
+        people.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      select.innerHTML = options;
+
+      // 今日の日付と現在時刻をデフォルト設定
+      const now = new Date();
+      document.getElementById('manualDate').valueAsDate = now;
+      document.getElementById('manualTime').value = now.toTimeString().substring(0, 5);
     }
 
     // 人を追加
@@ -813,6 +865,53 @@
 
       document.getElementById('monthlyReportContent').innerHTML = reportsHtml || '<p>データがありません</p>';
     }
+
+    // 手動記録の追加
+    document.getElementById('manualRecordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const personId = document.getElementById('manualPersonSelect').value;
+      const person = people.find(p => p.id === personId);
+      const dateInput = document.getElementById('manualDate').value;
+      const timeInput = document.getElementById('manualTime').value;
+      const route = document.querySelector('input[name="manualRoute"]:checked').value;
+
+      // 日付フォーマット変換 (YYYY-MM-DD → YYYY/MM/DD)
+      const [year, month, day] = dateInput.split('-');
+      const formattedDate = `${year}/${parseInt(month)}/${parseInt(day)}`;
+
+      const submitBtn = document.getElementById('manualSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '記録中...';
+
+      try {
+        const recordData = {
+          personId: person.id,
+          personName: person.name,
+          route: route,
+          date: formattedDate,
+          time: timeInput + ':00',
+          lat: 0,  // 手動記録は位置情報なし
+          lng: 0,
+          distance: 0,
+          manual: true,  // 手動記録フラグ
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('records').add(recordData);
+        records.unshift({ id: Date.now(), ...recordData });
+
+        this.reset();
+        updateManualForm();  // フォームをリセット
+        alert('記録を追加しました');
+      } catch (error) {
+        console.error('記録エラー:', error);
+        alert('記録の追加に失敗しました: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '記録を追加';
+      }
+    });
 
     // 初期化
     loadData();
