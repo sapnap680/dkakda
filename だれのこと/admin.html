@@ -407,27 +407,31 @@
         margin: 0 !important;
       }
       .summary-row {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 3mm !important;
-        padding: 2mm 2.5mm !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 2mm 4mm !important;
         margin: 0 !important;
         border: 1px solid #06b6d4 !important;
         background-color: white !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        gap: 4mm !important;
       }
       .summary-pair {
         display: flex !important;
         align-items: center !important;
+        justify-content: space-between !important;
+        flex: 1 1 48% !important;
+        min-width: 0 !important;
         gap: 2mm !important;
-        width: 100% !important;
       }
       .summary-label {
         font-size: 9pt !important;
         font-weight: bold;
-        white-space: nowrap;
+        white-space: nowrap !important;
         margin: 0 !important;
         padding: 1.5mm 2.5mm !important;
         color: #0e7490 !important;
@@ -436,7 +440,7 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.2 !important;
-        flex: 0 0 auto !important;
+        flex-shrink: 0 !important;
       }
       .summary-value {
         font-size: 10pt !important;
@@ -446,7 +450,8 @@
         color: #1f2937 !important;
         line-height: 1.2 !important;
         text-align: right !important;
-        flex: 1 1 auto !important;
+        white-space: nowrap !important;
+        flex-grow: 1 !important;
       }
       /* 合計セクション */
       .total-section {
