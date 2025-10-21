@@ -411,7 +411,7 @@
         grid-template-columns: auto 1fr auto 1fr !important;
         gap: 3mm !important;
         align-items: center !important;
-        padding: 1.5mm 2.5mm !important;
+        padding: 2mm 2.5mm !important;
         margin: 0 !important;
         border: 1px solid #06b6d4 !important;
         background-color: white !important;
@@ -419,6 +419,7 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         line-height: 1.2;
+        min-height: 8mm;
       }
       .summary-label {
         font-size: 9pt !important;
@@ -427,10 +428,12 @@
         margin: 0 !important;
         color: #0e7490 !important;
         background-color: rgba(6, 182, 212, 0.1) !important;
-        padding: 1.5mm 2mm !important;
+        padding: 1mm 2mm !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        display: inline-block;
+        vertical-align: middle;
       }
       .summary-value {
         font-size: 10pt !important;
@@ -438,40 +441,49 @@
         text-align: right;
         margin: 0 !important;
         color: #1f2937 !important;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 1.2;
       }
       /* 合計セクション */
       .total-section {
         page-break-inside: avoid !important;
         margin-top: 3mm !important;
         margin-bottom: 0 !important;
-        padding: 3mm 4mm !important;
-        background: linear-gradient(135deg, #0891b2, #06b6d4) !important;
-        border-radius: 3mm;
-        display: flex !important;
-        justify-content: space-around !important;
-        gap: 5mm !important;
+        padding: 2mm !important;
+        background: linear-gradient(to right, #ecfeff, #f0f9ff) !important;
+        border: 2px solid #06b6d4 !important;
+        border-radius: 2mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .total-item {
-        text-align: center;
-        flex: 1;
+        display: grid !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 3mm !important;
+        align-items: center !important;
+        padding: 1.5mm 2mm !important;
+        margin: 0 !important;
+      }
+      .total-item:not(:last-child) {
+        border-bottom: 1px solid #e5e7eb !important;
       }
       .total-label {
         font-size: 10pt !important;
         font-weight: bold;
-        color: white !important;
-        margin-bottom: 2mm !important;
+        color: #0e7490 !important;
+        background-color: rgba(6, 182, 212, 0.1) !important;
+        padding: 1mm 2mm !important;
+        border-radius: 1.5mm;
+        white-space: nowrap;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .total-value {
-        font-size: 16pt !important;
+        font-size: 14pt !important;
         font-weight: bold;
-        color: white !important;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        color: #1f2937 !important;
+        text-align: right;
       }
     }
 
@@ -645,31 +657,35 @@
     /* 合計セクション */
     .total-section {
       margin-top: 20px;
-      padding: 20px 24px;
-      background: linear-gradient(135deg, #0891b2, #06b6d4);
+      padding: 16px;
+      background: linear-gradient(to right, #ecfeff, #f0f9ff);
       border-radius: 12px;
-      display: flex;
-      justify-content: space-around;
-      gap: 24px;
-      box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+      border: 2px solid #06b6d4;
     }
     .total-item {
-      text-align: center;
-      flex: 1;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+    }
+    .total-item:not(:last-child) {
+      border-bottom: 1px solid #e5e7eb;
     }
     .total-label {
       font-size: 14px;
       font-weight: bold;
-      color: white;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      color: #0e7490;
+      background-color: rgba(6, 182, 212, 0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      white-space: nowrap;
     }
     .total-value {
-      font-size: 28px;
+      font-size: 20px;
       font-weight: bold;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      color: #1f2937;
+      text-align: right;
     }
   </style>
 </head>
@@ -1362,7 +1378,7 @@
                   <td>${person.name}</td>
                 </tr>
                 <tr>
-                  <td>家 最寄り駅</td>
+                  <td>自宅 最寄り駅</td>
                   <td>${person.homeStation}</td>
                 </tr>
                 <tr>
