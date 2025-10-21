@@ -205,15 +205,13 @@
     @media print {
       @page {
         size: A4;
-        margin: 8mm 10mm;
+        margin: 5mm 8mm;
       }
       body {
         background: white !important;
-        background-color: white !important;
-        background-image: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        font-size: 7pt;
+        font-size: 6pt;
       }
       /* ナビゲーションと装飾要素を非表示 */
       body > div:nth-child(1),
@@ -272,94 +270,98 @@
         padding: 0;
         margin: 0;
       }
-      #monthlyReportContent {
-        margin: 0;
-        padding: 0;
-      }
       .print-page {
         page-break-after: always;
         page-break-inside: avoid;
         padding: 0;
         margin: 0;
         box-shadow: none;
-        max-width: 100%;
         width: 100%;
         min-height: 0;
-        display: flex;
-        flex-direction: column;
       }
       .print-page:last-child {
         page-break-after: auto;
       }
       /* レポートヘッダー */
       .report-header {
-        margin-bottom: 2mm;
+        margin-bottom: 1mm;
         border-bottom: 1px solid #333;
-        padding-bottom: 1mm;
+        padding-bottom: 0.5mm;
+        text-align: center;
       }
       .report-header h2 {
-        font-size: 11pt;
+        font-size: 10pt;
         margin: 0;
         font-weight: bold;
+        border: none;
       }
       .report-header .month {
-        font-size: 9pt;
-        margin-top: 0.5mm;
+        font-size: 8pt;
+        margin: 0;
       }
       /* 従業員情報 */
       .employee-info {
-        margin-bottom: 2mm;
-        padding: 1.5mm;
+        margin-bottom: 1mm;
+        padding: 0.5mm;
         background-color: #f5f5f5;
-        border: 0.5px solid #ddd;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       .employee-info table {
-        font-size: 6.5pt;
+        font-size: 6pt;
         width: 100%;
+        border: none;
       }
       .employee-info td {
-        padding: 0.5mm 1.5mm;
-        line-height: 1.3;
+        padding: 0.3mm 1mm;
+        line-height: 1.2;
+        border: none;
       }
       .employee-info td:first-child {
-        width: 60px;
+        width: 50px;
         font-weight: bold;
       }
       /* カレンダー */
       .calendar-container {
-        margin-top: 2mm;
+        margin-top: 1mm;
       }
       .calendar-title {
-        font-size: 8pt;
-        margin-bottom: 1mm;
+        font-size: 7pt;
+        margin-bottom: 0.5mm;
         font-weight: bold;
       }
       .calendar {
-        font-size: 5.5pt;
-        margin-bottom: 2mm;
+        font-size: 5pt;
+        margin-bottom: 1mm;
         width: 100%;
         border-collapse: collapse;
       }
       .calendar th {
-        padding: 1mm;
-        font-size: 6pt;
-        background-color: #e0e0e0 !important;
+        padding: 0.5mm;
+        font-size: 5.5pt;
+        background-color: #ddd !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        border: 0.3px solid #999;
       }
       .calendar td {
-        padding: 0.5mm;
-        height: 18px;
+        padding: 0.3mm;
+        height: 12px;
         vertical-align: middle;
-        border: 0.5px solid #ccc;
+        text-align: center;
+        border: 0.3px solid #ccc;
       }
       .calendar .day-number {
-        font-size: 7pt;
+        font-size: 6pt;
         font-weight: bold;
       }
       .calendar .attendance-mark {
-        font-size: 20px;
-        line-height: 0.8;
+        font-size: 16px;
+        line-height: 0.6;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
       }
       .calendar .sunday {
         background-color: #ffe0e0 !important;
@@ -374,42 +376,42 @@
       /* 集計セクション */
       .summary-section {
         page-break-inside: avoid;
-        margin-top: 2mm;
-        padding: 2mm;
-        background-color: #f9f9f9;
-        border: 1px solid #ddd;
+        margin-top: 1mm;
+        padding: 1mm;
+        background-color: #f5f5f5;
+        border: 0.5px solid #999;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-section h3 {
-        font-size: 9pt;
-        margin: 0 0 1.5mm 0;
+        font-size: 8pt;
+        margin: 0 0 1mm 0;
         font-weight: bold;
+        border: none;
       }
       .summary-list {
         display: flex;
         flex-direction: column;
-        gap: 1.5mm;
-        margin-top: 1mm;
+        gap: 0.8mm;
       }
       .summary-row {
         display: grid;
         grid-template-columns: auto 1fr auto 1fr;
-        gap: 3mm;
+        gap: 2mm;
         align-items: center;
-        padding: 1.5mm 2mm;
-        border: 0.5px solid #ccc;
+        padding: 0.8mm 1.5mm;
+        border: 0.3px solid #999;
         background-color: white;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
       .summary-label {
-        font-size: 6.5pt;
+        font-size: 6pt;
         font-weight: bold;
         white-space: nowrap;
       }
       .summary-value {
-        font-size: 9pt;
+        font-size: 8pt;
         font-weight: bold;
         text-align: right;
       }
