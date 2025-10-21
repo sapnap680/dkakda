@@ -215,29 +215,33 @@
         margin: 0 !important;
         font-size: 9pt;
       }
-      /* 全ての要素を非表示にして、レポートコンテンツだけ表示 */
-      body > * {
+      /* ナビゲーションと装飾要素を非表示 */
+      body > div:nth-child(1),
+      body > div:nth-child(2),
+      .no-print {
         display: none !important;
       }
-      /* 月次レポートコンテンツのみ表示 */
-      #monthly,
-      #monthly #monthlyReportContent {
+      /* 月次レポートコンテナを表示 */
+      body > div:nth-child(3) {
         display: block !important;
-        background: white !important;
-        background-image: none !important;
+      }
+      .container {
+        display: block !important;
         max-width: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .container:not(#monthly) {
+        display: none !important;
       }
       #monthly {
+        display: block !important;
+        background: white !important;
+      }
+      #monthlyReportContent {
+        display: block !important;
         padding: 0 !important;
         margin: 0 !important;
-      }
-      #monthly #monthlyReportContent {
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      /* no-printクラスの要素を非表示 */
-      #monthly > *:not(#monthlyReportContent) {
-        display: none !important;
       }
       /* テーブル要素は適切に表示 */
       #monthlyReportContent table {
@@ -256,6 +260,12 @@
       #monthlyReportContent th,
       #monthlyReportContent td {
         display: table-cell !important;
+      }
+      #monthlyReportContent div,
+      #monthlyReportContent h2,
+      #monthlyReportContent h3,
+      #monthlyReportContent p {
+        display: block !important;
       }
       .section {
         box-shadow: none;
@@ -341,7 +351,7 @@
         font-size: 8pt;
       }
       .calendar .attendance-mark {
-        font-size: 16px;
+        font-size: 24px;
         line-height: 1;
       }
       /* 集計セクション */
@@ -358,7 +368,7 @@
       .summary-grid {
         gap: 1.5mm;
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
       }
       .summary-item {
         padding: 1.5mm;
@@ -376,81 +386,100 @@
     /* 月次レポート用スタイル（画面表示用） */
     .print-page {
       background: white;
-      margin: 20px auto;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      max-width: 210mm;
+      margin: 20px 0;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border: 2px solid #e5e7eb;
     }
     .report-header {
       text-align: center;
-      margin-bottom: 20px;
-      border-bottom: 3px solid #4CAF50;
-      padding-bottom: 10px;
+      margin-bottom: 24px;
+      border-bottom: 3px solid #06b6d4;
+      padding-bottom: 16px;
     }
     .report-header h2 {
-      font-size: 24px;
-      margin-bottom: 5px;
+      font-size: 28px;
+      margin-bottom: 8px;
       border: none;
+      font-weight: bold;
+      color: #1f2937;
     }
     .report-header .month {
       font-size: 20px;
-      color: #666;
+      color: #06b6d4;
+      font-weight: 600;
     }
     .employee-info {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: #f9f9f9;
-      border-radius: 5px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: linear-gradient(to right, #ecfeff, #f0f9ff);
+      border-radius: 12px;
+      border: 2px solid #06b6d4;
     }
     .employee-info table {
       width: 100%;
       border: none;
     }
     .employee-info td {
-      padding: 8px;
+      padding: 10px 12px;
       border: none;
     }
     .employee-info td:first-child {
       font-weight: bold;
       width: 150px;
-      background-color: #e8e8e8;
+      background-color: rgba(6, 182, 212, 0.1);
+      border-radius: 8px;
+      color: #0e7490;
     }
     .calendar-container {
-      margin-top: 20px;
+      margin-top: 24px;
     }
     .calendar-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: bold;
-      margin-bottom: 10px;
-      color: #333;
+      margin-bottom: 12px;
+      color: #1f2937;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #06b6d4;
     }
     .calendar {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .calendar th {
-      background-color: #4CAF50;
+      background: linear-gradient(to right, #0891b2, #06b6d4);
       color: white;
-      padding: 10px;
+      padding: 12px;
       font-size: 14px;
+      font-weight: bold;
     }
     .calendar td {
       width: 14.28%;
-      height: 60px;
-      border: 1px solid #ddd;
+      height: 70px;
+      border: 1px solid #e5e7eb;
       text-align: center;
       vertical-align: top;
-      padding: 5px;
+      padding: 8px;
       position: relative;
+      background: white;
+      transition: background 0.2s;
+    }
+    .calendar td:hover {
+      background: #f0f9ff;
     }
     .calendar .day-number {
       font-size: 16px;
       font-weight: bold;
+      color: #374151;
     }
     .calendar .attendance-mark {
-      font-size: 48px;
-      color: #4CAF50;
+      font-size: 64px;
+      color: #06b6d4;
       font-weight: bold;
       position: absolute;
       top: 50%;
@@ -459,46 +488,58 @@
       line-height: 1;
     }
     .calendar .sunday {
-      background-color: #ffe0e0;
+      background-color: #fee2e2;
     }
     .calendar .saturday {
-      background-color: #e0e8ff;
+      background-color: #dbeafe;
     }
     .calendar .other-month {
-      background-color: #f5f5f5;
-      color: #ccc;
+      background-color: #f9fafb;
+      color: #d1d5db;
     }
     .summary-section {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #f0f8f0;
-      border-radius: 5px;
-      border: 2px solid #4CAF50;
+      margin-top: 24px;
+      padding: 20px;
+      background: linear-gradient(to right, #ecfeff, #f0f9ff);
+      border-radius: 12px;
+      border: 2px solid #06b6d4;
     }
     .summary-section h3 {
       margin-top: 0;
+      margin-bottom: 16px;
       border: none;
+      font-size: 20px;
+      font-weight: bold;
+      color: #0e7490;
     }
     .summary-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-top: 10px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 12px;
     }
     .summary-item {
-      padding: 10px;
+      padding: 16px;
       background-color: white;
-      border-radius: 3px;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 2px solid #e5e7eb;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .summary-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .summary-label {
       font-size: 14px;
-      color: #666;
-      margin-bottom: 5px;
+      color: #6b7280;
+      margin-bottom: 8px;
+      font-weight: 600;
     }
     .summary-value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
-      color: #4CAF50;
+      color: #06b6d4;
     }
   </style>
 </head>
@@ -1222,8 +1263,16 @@
                   <div class="summary-value">${homeCount}回</div>
                 </div>
                 <div class="summary-item">
+                  <div class="summary-label">小計</div>
+                  <div class="summary-value">¥${(person.homeFare * homeCount).toLocaleString()}</div>
+                </div>
+                <div class="summary-item">
                   <div class="summary-label">学校→事務所</div>
                   <div class="summary-value">${schoolCount}回</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">小計</div>
+                  <div class="summary-value">¥${(person.universityFare * schoolCount).toLocaleString()}</div>
                 </div>
                 <div class="summary-item">
                   <div class="summary-label">合計出勤日数</div>
