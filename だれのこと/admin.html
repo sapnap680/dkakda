@@ -466,37 +466,12 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
-      .total-item {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 2mm !important;
-        padding: 1.5mm 2mm !important;
-        margin: 0 !important;
-      }
-      .total-item:not(:last-child) {
-        border-bottom: 1px solid #e5e7eb !important;
-      }
-      .total-label {
+      /* 合計セクション内の summary-row はより大きなフォントで表示 */
+      .total-section .summary-label {
         font-size: 10pt !important;
-        font-weight: bold;
-        color: #0e7490 !important;
-        background-color: rgba(6, 182, 212, 0.1) !important;
-        padding: 1mm 2mm !important;
-        border-radius: 1.5mm;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
       }
-      .total-value {
+      .total-section .summary-value {
         font-size: 14pt !important;
-        font-weight: bold;
-        color: #1f2937 !important;
-        text-align: right !important;
-        white-space: nowrap !important;
-        flex-shrink: 0 !important;
       }
     }
 
@@ -705,34 +680,12 @@
       border-radius: 12px;
       border: 2px solid #06b6d4;
     }
-    .total-item {
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 12px;
-    }
-    .total-item:not(:last-child) {
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .total-label {
+    /* 合計セクション内の summary-row はより大きなフォントで表示 */
+    .total-section .summary-label {
       font-size: 14px;
-      font-weight: bold;
-      color: #0e7490;
-      background-color: rgba(6, 182, 212, 0.1);
-      padding: 6px 12px;
-      border-radius: 6px;
-      white-space: nowrap;
-      flex-shrink: 0;
     }
-    .total-value {
+    .total-section .summary-value {
       font-size: 20px;
-      font-weight: bold;
-      color: #1f2937;
-      text-align: right;
-      white-space: nowrap;
-      flex-shrink: 0;
     }
   </style>
 </head>
@@ -1475,13 +1428,15 @@
             </div>
 
             <div class="total-section">
-              <div class="total-item">
-                <div class="total-label">合計出勤日数</div>
-                <div class="total-value">${personRecords.length}日</div>
-              </div>
-              <div class="total-item">
-                <div class="total-label">交通費合計</div>
-                <div class="total-value">¥${totalFare.toLocaleString()}</div>
+              <div class="summary-row">
+                <div class="summary-pair">
+                  <div class="summary-label">合計出勤日数</div>
+                  <div class="summary-value">${personRecords.length}日</div>
+                </div>
+                <div class="summary-pair">
+                  <div class="summary-label">交通費合計</div>
+                  <div class="summary-value">¥${totalFare.toLocaleString()}</div>
+                </div>
               </div>
             </div>
           </div>
