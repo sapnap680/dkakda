@@ -407,10 +407,11 @@
         margin: 0 !important;
       }
       .summary-row {
-        display: grid !important;
-        grid-template-columns: auto minmax(50px, auto) auto minmax(50px, auto) !important;
-        gap: 3mm !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
         align-items: center !important;
+        justify-content: space-between !important;
+        gap: 3mm !important;
         padding: 2mm 2.5mm !important;
         margin: 0 !important;
         border: 1px solid #06b6d4 !important;
@@ -418,33 +419,40 @@
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        height: 8mm !important;
+        min-height: 8mm !important;
       }
       .summary-label {
         font-size: 9pt !important;
         font-weight: bold;
         white-space: nowrap;
         margin: 0 !important;
+        padding: 0 !important;
         color: #0e7490 !important;
         background-color: rgba(6, 182, 212, 0.1) !important;
         padding: 1.5mm 2mm !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        line-height: 1 !important;
-        display: flex !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        display: inline-flex !important;
         align-items: center !important;
-        justify-content: flex-start !important;
+        flex-shrink: 0 !important;
       }
       .summary-value {
         font-size: 10pt !important;
         font-weight: bold;
         text-align: right;
         margin: 0 !important;
+        padding: 0 !important;
         color: #1f2937 !important;
-        line-height: 1 !important;
-        display: flex !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        display: inline-flex !important;
         align-items: center !important;
-        justify-content: flex-end !important;
+        flex-shrink: 0 !important;
+        min-width: 50px !important;
       }
       /* 合計セクション */
       .total-section {
