@@ -42,3 +42,4 @@ Firebase設定は各HTMLファイルの `firebaseConfig` オブジェクトで�
 3. 月次レポートで集計・印刷
 
 
+
