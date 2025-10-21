@@ -7,7 +7,10 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Tailwindで管理するため不要
     * {
       margin: 0;
       padding: 0;
@@ -45,6 +48,8 @@
     .top-bar a:hover {
       background-color: #5568d3;
     }
+    */
+    /* Tailwindで管理するため不要
     .header {
       max-width: 1400px;
       margin: 0 auto 20px;
@@ -66,6 +71,12 @@
       background-color: #4CAF50;
       color: white;
     }
+    */
+    .tab-button {
+      border: none;
+      cursor: pointer;
+    }
+    /* Tailwindで管理するため不要
     .container {
       max-width: 1400px;
       margin: 0 auto;
@@ -79,6 +90,7 @@
     .container.active.full {
       grid-template-columns: 1fr;
     }
+    */
     .section {
       background: white;
       padding: 30px;
@@ -193,12 +205,13 @@
     @media print {
       @page {
         size: A4;
-        margin: 15mm;
+        margin: 10mm 12mm;
       }
       body {
         background-color: white;
         padding: 0;
         margin: 0;
+        font-size: 10pt;
       }
       .top-bar, .header, .no-print {
         display: none !important;
@@ -230,80 +243,100 @@
         max-width: 100%;
         width: 100%;
         min-height: 0;
+        display: flex;
+        flex-direction: column;
       }
       .print-page:last-child {
         page-break-after: auto;
       }
       /* レポートヘッダー */
       .report-header {
-        margin-bottom: 5mm;
+        margin-bottom: 3mm;
         border-bottom: 2px solid #333;
-        padding-bottom: 3mm;
+        padding-bottom: 2mm;
       }
       .report-header h2 {
-        font-size: 20pt;
+        font-size: 16pt;
         margin: 0;
+        font-weight: bold;
       }
       .report-header .month {
-        font-size: 16pt;
+        font-size: 13pt;
+        margin-top: 1mm;
       }
       /* 従業員情報 */
       .employee-info {
-        margin-bottom: 5mm;
-        padding: 3mm;
+        margin-bottom: 3mm;
+        padding: 2mm;
+        background-color: #f5f5f5;
       }
       .employee-info table {
-        font-size: 10pt;
+        font-size: 9pt;
+        width: 100%;
       }
       .employee-info td {
-        padding: 2mm;
+        padding: 1mm 2mm;
+      }
+      .employee-info td:first-child {
+        width: 100px;
+        font-weight: bold;
       }
       /* カレンダー */
       .calendar-container {
-        margin-top: 3mm;
+        margin-top: 2mm;
       }
       .calendar-title {
-        font-size: 12pt;
-        margin-bottom: 2mm;
+        font-size: 11pt;
+        margin-bottom: 1mm;
+        font-weight: bold;
       }
       .calendar {
-        font-size: 9pt;
-        margin-bottom: 3mm;
+        font-size: 8pt;
+        margin-bottom: 2mm;
+        width: 100%;
       }
       .calendar th {
-        padding: 2mm;
+        padding: 1mm;
+        font-size: 8pt;
       }
       .calendar td {
-        padding: 1mm;
-        height: auto;
+        padding: 0.5mm;
+        height: 20px;
+        vertical-align: middle;
       }
       .calendar .day-number {
-        font-size: 10pt;
+        font-size: 9pt;
       }
       .calendar .attendance-mark {
-        font-size: 24px;
+        font-size: 20px;
+        line-height: 1;
       }
       /* 集計セクション */
       .summary-section {
         page-break-inside: avoid;
-        margin-top: 3mm;
-        padding: 3mm;
+        margin-top: 2mm;
+        padding: 2mm;
       }
       .summary-section h3 {
-        font-size: 14pt;
+        font-size: 12pt;
         margin: 0 0 2mm 0;
+        font-weight: bold;
       }
       .summary-grid {
         gap: 2mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
       }
       .summary-item {
         padding: 2mm;
       }
       .summary-label {
-        font-size: 10pt;
+        font-size: 9pt;
+        margin-bottom: 1mm;
       }
       .summary-value {
-        font-size: 18pt;
+        font-size: 16pt;
+        font-weight: bold;
       }
     }
 
@@ -436,145 +469,192 @@
     }
   </style>
 </head>
-<body>
-  <div class="top-bar">
-    <h1>管理画面</h1>
-    <a href="attendance.html">出勤記録へ</a>
-  </div>
-
-  <div class="header">
-    <button class="tab-button active" onclick="switchTab('today')">本日の出勤</button>
-    <button class="tab-button" onclick="switchTab('manual')">手動記録</button>
-    <button class="tab-button" onclick="switchTab('management')">人員管理</button>
-    <button class="tab-button" onclick="switchTab('stats')">統計</button>
-    <button class="tab-button" onclick="switchTab('monthly')">月次レポート</button>
-    <button class="tab-button" onclick="switchTab('settings')">設定</button>
-  </div>
-
-  <!-- 本日の出勤タブ -->
-  <div id="today" class="container active full">
-    <div class="section">
-      <h2>本日の出勤状況</h2>
-      <div id="todayStats"></div>
+<body class="min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400">
+  <!-- トップバー -->
+  <div class="bg-white/95 backdrop-blur-sm shadow-lg border-b-4 border-cyan-500">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+        管理画面
+      </h1>
+      <a href="attendance.html" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        出勤記録へ
+      </a>
     </div>
   </div>
 
-  <!-- 手動記録タブ -->
-  <div id="manual" class="container active full">
-    <div class="section">
-      <h2>手動で出勤記録を追加</h2>
-      <p style="color: #666; margin-bottom: 20px;">※ 管理者用：場所・回数制限なしで記録を追加できます</p>
-      
-      <form id="manualRecordForm">
-        <label for="manualPersonSelect">氏名:</label>
-        <select id="manualPersonSelect" required>
-          <option value="">--- 選択してください ---</option>
-        </select>
+  <!-- タブナビゲーション -->
+  <div class="max-w-7xl mx-auto px-6 py-6">
+    <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-2 flex flex-wrap gap-2">
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md" onclick="switchTab('today')">本日の出勤</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('manual')">手動記録</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('management')">人員管理</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('stats')">統計</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('monthly')">月次レポート</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('settings')">設定</button>
+    </div>
+  </div>
 
-        <label for="manualDate">日付:</label>
-        <input type="date" id="manualDate" required>
+  <!-- コンテンツエリア -->
+  <div class="max-w-7xl mx-auto px-6 pb-8">
+    <!-- 本日の出勤タブ -->
+    <div id="today" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">本日の出勤状況</h2>
+        <div id="todayStats"></div>
+      </div>
+    </div>
 
-        <label for="manualTime">時刻:</label>
-        <input type="time" id="manualTime" required>
+    <!-- 手動記録タブ -->
+    <div id="manual" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">手動で出勤記録を追加</h2>
+        <p class="text-gray-600 mb-6 bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">※ 管理者用：場所・回数制限なしで記録を追加できます</p>
+        
+        <form id="manualRecordForm" class="space-y-4">
+          <div>
+            <label for="manualPersonSelect" class="block text-sm font-bold text-gray-700 mb-2">氏名:</label>
+            <select id="manualPersonSelect" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+              <option value="">--- 選択してください ---</option>
+            </select>
+          </div>
 
-        <label>交通経路:</label>
-        <div style="margin-bottom: 15px;">
-          <label style="display: inline-flex; align-items: center; margin-right: 20px;">
-            <input type="radio" name="manualRoute" value="家→事務所" required style="margin-right: 8px;">
-            家→事務所
-          </label>
-          <label style="display: inline-flex; align-items: center;">
-            <input type="radio" name="manualRoute" value="学校→事務所" style="margin-right: 8px;">
-            学校→事務所
-          </label>
+          <div>
+            <label for="manualDate" class="block text-sm font-bold text-gray-700 mb-2">日付:</label>
+            <input type="date" id="manualDate" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="manualTime" class="block text-sm font-bold text-gray-700 mb-2">時刻:</label>
+            <input type="time" id="manualTime" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">交通経路:</label>
+            <div class="space-y-2">
+              <label class="flex items-center p-3 border-2 border-gray-300 rounded-xl hover:border-cyan-500 cursor-pointer transition">
+                <input type="radio" name="manualRoute" value="家→事務所" required class="w-5 h-5 text-cyan-600 focus:ring-cyan-500">
+                <span class="ml-3 text-gray-700 font-medium">家→事務所</span>
+              </label>
+              <label class="flex items-center p-3 border-2 border-gray-300 rounded-xl hover:border-cyan-500 cursor-pointer transition">
+                <input type="radio" name="manualRoute" value="学校→事務所" class="w-5 h-5 text-cyan-600 focus:ring-cyan-500">
+                <span class="ml-3 text-gray-700 font-medium">学校→事務所</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" id="manualSubmitBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            記録を追加
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 人員管理タブ -->
+    <div id="management" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">人員管理</h2>
+        
+        <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8">新しい人を追加</h3>
+        <form id="personForm" class="space-y-4 mb-8">
+          <div>
+            <label for="personName" class="block text-sm font-bold text-gray-700 mb-2">氏名:</label>
+            <input type="text" id="personName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="homeStation" class="block text-sm font-bold text-gray-700 mb-2">最寄り駅（家）:</label>
+            <input type="text" id="homeStation" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="homeFare" class="block text-sm font-bold text-gray-700 mb-2">往復交通費（家→事務所） (円):</label>
+            <input type="number" id="homeFare" min="0" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="universityStation" class="block text-sm font-bold text-gray-700 mb-2">大学最寄り駅:</label>
+            <input type="text" id="universityStation" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="universityFare" class="block text-sm font-bold text-gray-700 mb-2">往復交通費（学校→事務所） (円):</label>
+            <input type="number" id="universityFare" min="0" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <button type="submit" id="addPersonBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            登録
+          </button>
+        </form>
+
+        <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8 pt-6 border-t-2 border-gray-200">登録済みの人</h3>
+        <div id="personList"></div>
+      </div>
+    </div>
+
+    <!-- 統計タブ -->
+    <div id="stats" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">出勤統計</h2>
+        <div id="statsContent"></div>
+      </div>
+    </div>
+
+    <!-- 月次レポートタブ -->
+    <div id="monthly" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8 no-print">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">月次レポート</h2>
+        <div class="space-y-4">
+          <div>
+            <label for="monthSelect" class="block text-sm font-bold text-gray-700 mb-2">月を選択:</label>
+            <select id="monthSelect" onchange="updateMonthlyReport()" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+              <option value="">--- 選択してください ---</option>
+            </select>
+          </div>
+          <button onclick="window.print()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            印刷
+          </button>
+        </div>
+      </div>
+
+      <div id="monthlyReportContent"></div>
+    </div>
+
+    <!-- 設定タブ -->
+    <div id="settings" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">設定</h2>
+        
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-red-600 mb-2 border-b-2 border-red-600 pb-2">危険な操作</h3>
+          <p class="text-gray-600 bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+            以下の操作は取り消せません。十分注意して実行してください。
+          </p>
         </div>
 
-        <button type="submit" id="manualSubmitBtn">記録を追加</button>
-      </form>
-    </div>
-  </div>
+        <div class="bg-yellow-50 p-6 rounded-xl border-l-4 border-yellow-500 mb-6 shadow-md">
+          <h4 class="text-lg font-bold text-yellow-800 mb-3">出勤記録を全て削除</h4>
+          <p class="text-yellow-800 mb-4">
+            年度末などに、全ての出勤記録を削除します。<br>
+            <strong>※ 人員情報は削除されません（出勤記録のみ削除されます）</strong>
+          </p>
+          <button onclick="deleteAllRecords()" class="px-6 py-3 bg-yellow-600 text-white rounded-xl font-bold hover:bg-yellow-700 transition duration-200 shadow-lg hover:shadow-xl">
+            全ての出勤記録を削除
+          </button>
+        </div>
 
-  <!-- 人員管理タブ -->
-  <div id="management" class="container active full">
-    <div class="section">
-      <h2>人員管理</h2>
-      
-      <h3>新しい人を追加</h3>
-      <form id="personForm">
-        <label for="personName">氏名:</label>
-        <input type="text" id="personName" required>
-
-        <label for="homeStation">最寄り駅（家）:</label>
-        <input type="text" id="homeStation" required>
-
-        <label for="homeFare">往復交通費（家→事務所） (円):</label>
-        <input type="number" id="homeFare" min="0" required>
-
-        <label for="universityStation">大学最寄り駅:</label>
-        <input type="text" id="universityStation" required>
-
-        <label for="universityFare">往復交通費（学校→事務所） (円):</label>
-        <input type="number" id="universityFare" min="0" required>
-
-        <button type="submit" id="addPersonBtn">登録</button>
-      </form>
-
-      <h3>登録済みの人</h3>
-      <div id="personList"></div>
-    </div>
-  </div>
-
-  <!-- 統計タブ -->
-  <div id="stats" class="container active full">
-    <div class="section">
-      <h2>出勤統計</h2>
-      <div id="statsContent"></div>
-    </div>
-  </div>
-
-  <!-- 月次レポートタブ -->
-  <div id="monthly" class="container active full">
-    <div class="section no-print">
-      <h2>月次レポート</h2>
-      <label for="monthSelect">月を選択:</label>
-      <select id="monthSelect" onchange="updateMonthlyReport()">
-        <option value="">--- 選択してください ---</option>
-      </select>
-      <button onclick="window.print()" style="margin-top: 20px;">印刷</button>
-    </div>
-
-    <div id="monthlyReportContent"></div>
-  </div>
-
-  <!-- 設定タブ -->
-  <div id="settings" class="container active full">
-    <div class="section">
-      <h2>設定</h2>
-      
-      <h3 style="color: #f44336; border-bottom: 2px solid #f44336;">危険な操作</h3>
-      <p style="color: #666; margin-bottom: 20px;">
-        以下の操作は取り消せません。十分注意して実行してください。
-      </p>
-
-      <div style="background-color: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
-        <h4 style="margin-top: 0; color: #856404;">出勤記録を全て削除</h4>
-        <p style="color: #856404; margin-bottom: 15px;">
-          年度末などに、全ての出勤記録を削除します。<br>
-          <strong>※ 人員情報は削除されません（出勤記録のみ削除されます）</strong>
-        </p>
-        <button class="danger" onclick="deleteAllRecords()">全ての出勤記録を削除</button>
-      </div>
-
-      <div style="background-color: #f8d7da; padding: 20px; border-radius: 5px; border-left: 4px solid #f44336;">
-        <h4 style="margin-top: 0; color: #721c24;">全データを削除</h4>
-        <p style="color: #721c24; margin-bottom: 15px;">
-          全ての人員情報と出勤記録を削除します。<br>
-          <strong>※ システムを完全にリセットします</strong>
-        </p>
-        <button class="danger" onclick="deleteAllData()">全データを削除（完全リセット）</button>
+        <div class="bg-red-50 p-6 rounded-xl border-l-4 border-red-600 shadow-md">
+          <h4 class="text-lg font-bold text-red-800 mb-3">全データを削除</h4>
+          <p class="text-red-800 mb-4">
+            全ての人員情報と出勤記録を削除します。<br>
+            <strong>※ システムを完全にリセットします</strong>
+          </p>
+          <button onclick="deleteAllData()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition duration-200 shadow-lg hover:shadow-xl">
+            全データを削除（完全リセット）
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </div> <!-- max-w-7xl mx-auto px-6 pb-8 閉じタグ -->
 
   <script>
     // Firebase設定
@@ -631,11 +711,21 @@
 
     // タブ切り替え
     function switchTab(tabName) {
-      document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+      // すべてのコンテナを非表示
+      document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
       
-      document.getElementById(tabName).classList.add('active');
-      event.target.classList.add('active');
+      // すべてのタブボタンを非アクティブに
+      document.querySelectorAll('.tab-button').forEach(el => {
+        el.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-cyan-600', 'text-white', 'shadow-md');
+        el.classList.add('hover:bg-cyan-50', 'text-gray-700');
+      });
+      
+      // 選択されたコンテナを表示
+      document.getElementById(tabName).classList.remove('hidden');
+      
+      // 選択されたタブボタンをアクティブに
+      event.target.classList.remove('hover:bg-cyan-50', 'text-gray-700');
+      event.target.classList.add('bg-gradient-to-r', 'from-blue-600', 'to-cyan-600', 'text-white', 'shadow-md');
 
       // タブ固有の処理を一元管理
       switch(tabName) {
@@ -848,24 +938,24 @@
         const totalFare = p.homeFare * homeCount + p.universityFare * schoolCount;
         
         return `
-          <div class="person-item">
-            <strong>${p.name}</strong>
-            <div class="person-info">
-              家最寄り駅: ${p.homeStation} (¥${p.homeFare.toLocaleString()}) | 
-              大学最寄り駅: ${p.universityStation} (¥${p.universityFare.toLocaleString()})
+          <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-cyan-200 hover:shadow-lg transition mb-4">
+            <div class="text-xl font-bold text-gray-800 mb-3">${p.name}</div>
+            <div class="text-sm text-gray-600 mb-4 bg-white p-3 rounded-lg">
+              <span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>) | 
+              <span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>)
             </div>
-            <div class="person-stats">
-              <div class="person-stat">
-                <div>出勤回数</div>
-                <div class="person-stat-value">${count}</div>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-white p-4 rounded-lg text-center">
+                <div class="text-sm text-gray-600 mb-1">出勤回数</div>
+                <div class="text-2xl font-bold text-cyan-600">${count}</div>
               </div>
-              <div class="person-stat">
-                <div>交通費合計</div>
-                <div class="person-stat-value">¥${totalFare.toLocaleString()}</div>
+              <div class="bg-white p-4 rounded-lg text-center">
+                <div class="text-sm text-gray-600 mb-1">交通費合計</div>
+                <div class="text-2xl font-bold text-cyan-600">¥${totalFare.toLocaleString()}</div>
               </div>
-              <div class="person-stat" style="display: flex; gap: 5px;">
-                <button class="secondary" style="padding: 5px 10px; font-size: 14px; margin: 0; flex: 1;" onclick="editPerson('${p.id}')">編集</button>
-                <button class="danger" style="padding: 5px 10px; font-size: 14px; margin: 0; flex: 1;" onclick="deletePerson('${p.id}')">削除</button>
+              <div class="flex gap-2">
+                <button onclick="editPerson('${p.id}')" class="flex-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-bold hover:from-blue-700 hover:to-cyan-700 transition text-sm">編集</button>
+                <button onclick="deletePerson('${p.id}')" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition text-sm">削除</button>
               </div>
             </div>
           </div>
@@ -880,27 +970,31 @@
       const today = getDateString(new Date());
       const todayRecords = records.filter(r => r.date === today);
 
-      const html = todayRecords.length === 0 ? '<p>本日の記録はありません</p>' : `
-        <table>
-          <thead>
-            <tr>
-              <th>氏名</th>
-              <th>時刻</th>
-              <th>経路</th>
-              <th>距離</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${todayRecords.map(r => `
-              <tr>
-                <td>${r.personName}</td>
-                <td>${r.time}</td>
-                <td>${r.route}</td>
-                <td>${Math.round(r.distance)}m</td>
+      const html = todayRecords.length === 0 
+        ? '<p class="text-gray-500 text-center py-8">本日の記録はありません</p>' 
+        : `
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+                <th class="px-6 py-3 text-left font-bold">氏名</th>
+                <th class="px-6 py-3 text-left font-bold">時刻</th>
+                <th class="px-6 py-3 text-left font-bold">経路</th>
+                <th class="px-6 py-3 text-left font-bold">距離</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${todayRecords.map((r, i) => `
+                <tr class="${i % 2 === 0 ? 'bg-cyan-50' : 'bg-white'} hover:bg-cyan-100 transition">
+                  <td class="px-6 py-4 font-bold text-gray-800">${r.personName}</td>
+                  <td class="px-6 py-4 text-gray-700">${r.time}</td>
+                  <td class="px-6 py-4 text-gray-700">${r.route}</td>
+                  <td class="px-6 py-4 text-cyan-600 font-bold">${Math.round(r.distance)}m</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
 
       document.getElementById('todayStats').innerHTML = html;
@@ -918,31 +1012,33 @@
       });
 
       const html = `
-        <table>
-          <thead>
-            <tr>
-              <th>氏名</th>
-              <th>家→事務所</th>
-              <th>学校→事務所</th>
-              <th>合計出勤</th>
-              <th>交通費合計</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${stats.map(s => `
-              <tr>
-                <td>${s.name}</td>
-                <td>${s.homeCount}</td>
-                <td>${s.schoolCount}</td>
-                <td>${s.total}</td>
-                <td>¥${s.totalFare.toLocaleString()}</td>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
+                <th class="px-6 py-3 text-left font-bold">氏名</th>
+                <th class="px-6 py-3 text-center font-bold">家→事務所</th>
+                <th class="px-6 py-3 text-center font-bold">学校→事務所</th>
+                <th class="px-6 py-3 text-center font-bold">合計出勤</th>
+                <th class="px-6 py-3 text-right font-bold">交通費合計</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${stats.map((s, i) => `
+                <tr class="${i % 2 === 0 ? 'bg-cyan-50' : 'bg-white'} hover:bg-cyan-100 transition">
+                  <td class="px-6 py-4 font-bold text-gray-800">${s.name}</td>
+                  <td class="px-6 py-4 text-center text-gray-700">${s.homeCount}</td>
+                  <td class="px-6 py-4 text-center text-gray-700">${s.schoolCount}</td>
+                  <td class="px-6 py-4 text-center font-bold text-cyan-600">${s.total}</td>
+                  <td class="px-6 py-4 text-right font-bold text-cyan-600">¥${s.totalFare.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
 
-      document.getElementById('statsContent').innerHTML = html || '<p>データがありません</p>';
+      document.getElementById('statsContent').innerHTML = html || '<p class="text-gray-500 text-center py-8">データがありません</p>';
     }
 
     // 月選択リストを生成
@@ -1253,7 +1349,10 @@
     }
 
     // 初期化
-    loadData();
+    loadData().then(() => {
+      // 初期表示を"本日の出勤"タブに設定
+      document.getElementById('today').classList.remove('hidden');
+    });
   </script>
 </body>
 </html>
