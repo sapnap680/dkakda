@@ -706,10 +706,11 @@
       border: 2px solid #06b6d4;
     }
     .total-item {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 12px;
+      display: flex;
+      flex-wrap: nowrap;
       align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       padding: 10px 12px;
     }
     .total-item:not(:last-child) {
@@ -723,12 +724,15 @@
       padding: 6px 12px;
       border-radius: 6px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .total-value {
       font-size: 20px;
       font-weight: bold;
       color: #1f2937;
       text-align: right;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
   </style>
 </head>
