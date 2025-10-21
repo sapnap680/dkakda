@@ -467,10 +467,11 @@
         print-color-adjust: exact;
       }
       .total-item {
-        display: grid !important;
-        grid-template-columns: auto 1fr !important;
-        gap: 3mm !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
         align-items: center !important;
+        justify-content: space-between !important;
+        gap: 2mm !important;
         padding: 1.5mm 2mm !important;
         margin: 0 !important;
       }
@@ -484,7 +485,8 @@
         background-color: rgba(6, 182, 212, 0.1) !important;
         padding: 1mm 2mm !important;
         border-radius: 1.5mm;
-        white-space: nowrap;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
@@ -492,7 +494,9 @@
         font-size: 14pt !important;
         font-weight: bold;
         color: #1f2937 !important;
-        text-align: right;
+        text-align: right !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
       }
     }
 
