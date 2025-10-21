@@ -271,16 +271,19 @@
         margin: 0;
       }
       .print-page {
-        page-break-after: always;
-        page-break-inside: avoid;
-        padding: 0;
-        margin: 0;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        padding: 0 !important;
+        margin: 0 !important;
         box-shadow: none;
         width: 100%;
         min-height: 0;
       }
       .print-page:last-child {
-        page-break-after: auto;
+        page-break-after: avoid !important;
+      }
+      .print-page:only-child {
+        page-break-after: avoid !important;
       }
       /* レポートヘッダー */
       .report-header {
