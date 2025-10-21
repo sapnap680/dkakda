@@ -411,29 +411,30 @@
         flex-wrap: nowrap !important;
         align-items: center !important;
         justify-content: space-between !important;
-        padding: 2mm 4mm !important;
+        padding: 2mm 3mm !important;
         margin: 0 !important;
         border: 1px solid #06b6d4 !important;
         background-color: white !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        gap: 4mm !important;
+        gap: 2mm !important;
       }
       .summary-pair {
         display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        flex: 1 1 48% !important;
-        min-width: 0 !important;
-        gap: 2mm !important;
+        flex: 1 1 auto !important;
+        min-width: 120px !important;
+        max-width: 50% !important;
+        gap: 1.5mm !important;
       }
       .summary-label {
         font-size: 9pt !important;
         font-weight: bold;
         white-space: nowrap !important;
         margin: 0 !important;
-        padding: 1.5mm 2.5mm !important;
+        padding: 1mm 2mm !important;
         color: #0e7490 !important;
         background-color: rgba(6, 182, 212, 0.1) !important;
         border-radius: 1.5mm;
@@ -446,12 +447,12 @@
         font-size: 10pt !important;
         font-weight: bold;
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 0 1mm 0 0 !important;
         color: #1f2937 !important;
         line-height: 1.2 !important;
         text-align: right !important;
         white-space: nowrap !important;
-        flex-grow: 1 !important;
+        flex-shrink: 0 !important;
       }
       /* 合計セクション */
       .total-section {
@@ -673,6 +674,24 @@
       text-align: right !important;
       white-space: nowrap !important;
       flex-grow: 1 !important;
+    }
+    /* 月次レポート専用：画面表示でも1行で収まるように上書き */
+    #monthlyReportContent .summary-row {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 12px !important;
+    }
+    #monthlyReportContent .summary-pair {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      flex: 1 1 48% !important;
+    }
+    #monthlyReportContent .summary-label,
+    #monthlyReportContent .summary-value {
+      white-space: nowrap !important;
     }
     /* 合計セクション */
     .total-section {
