@@ -8,168 +8,9 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: "メイリオ", sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    .container {
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      max-width: 500px;
-      width: 100%;
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #333;
-      text-align: center;
-    }
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 30px;
-      font-size: 14px;
-    }
-    .subtitle a {
-      color: #667eea;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .subtitle a:hover {
-      text-decoration: underline;
-    }
-    #locationStatus {
-      padding: 15px;
-      margin-bottom: 25px;
-      border-radius: 10px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 16px;
-    }
-    .location-ok {
-      background-color: #d4edda;
-      color: #155724;
-      border: 2px solid #c3e6cb;
-    }
-    .location-ng {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 2px solid #f5c6cb;
-    }
-    label {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #333;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 15px;
-      font-size: 18px;
-      margin-bottom: 20px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      transition: all 0.3s;
-    }
-    input[type="text"]:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    .error-message {
-      color: #f44336;
-      font-size: 14px;
-      margin-top: -15px;
-      margin-bottom: 15px;
-      display: none;
-    }
-    .error-message.show {
-      display: block;
-    }
-    input[type="radio"] {
-      transform: scale(1.5);
-      margin-right: 10px;
-      cursor: pointer;
-    }
-    .radio-group {
-      margin-bottom: 25px;
-    }
-    .radio-label {
-      font-size: 18px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-      padding: 15px;
-      background-color: #f9f9f9;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid transparent;
-    }
-    .radio-label:hover {
-      background-color: #f0f0f0;
-    }
-    .radio-label input:checked + span {
-      color: #667eea;
-    }
-    .radio-label input:checked {
-      accent-color: #667eea;
-    }
-    button {
-      width: 100%;
-      padding: 18px;
-      font-size: 20px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    }
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-    }
-    button:active {
-      transform: translateY(0);
-    }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-    .success-message {
-      background-color: #d4edda;
-      color: #155724;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
-      text-align: center;
-      font-weight: bold;
-      display: none;
-      border: 2px solid #c3e6cb;
-    }
-    .success-message.show {
-      display: block;
-      animation: slideIn 0.3s ease-out;
-    }
     @keyframes slideIn {
       from {
         opacity: 0;
@@ -180,39 +21,106 @@
         transform: translateY(0);
       }
     }
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <h1>出勤記録</h1>
-    <div class="subtitle">
-      管理画面は<a href="admin.html">こちら</a>
+<body class="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-4 md:p-8">
+  <!-- ランキングパネル -->
+  <div class="fixed top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-80 max-h-[80vh] overflow-y-auto hidden lg:block">
+    <div class="p-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-4 pb-3 border-b-2 border-indigo-500">
+        今月の出勤ランキング
+      </h3>
+      <div id="rankingList"></div>
     </div>
-    
-    <div id="locationStatus"></div>
-    
-    <form id="attendanceForm">
-      <label for="personName">氏名:</label>
-      <input type="text" id="personName" placeholder="氏名を入力してください" required autocomplete="off">
-      <div class="error-message" id="nameError">この名前は登録されていません</div>
+  </div>
 
-      <div class="radio-group">
-        <label>交通経路:</label>
-        <label class="radio-label">
-          <input type="radio" name="route" value="家→事務所" required>
-          <span>家 → 事務所</span>
-        </label>
-        <label class="radio-label">
-          <input type="radio" name="route" value="学校→事務所">
-          <span>学校 → 事務所</span>
-        </label>
+  <!-- メインコンテナ -->
+  <div class="max-w-2xl mx-auto">
+    <!-- スマホ用ランキング -->
+    <div class="lg:hidden mb-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6">
+      <h3 class="text-xl font-bold text-gray-800 mb-4 pb-3 border-b-2 border-indigo-500">
+        今月の出勤ランキング
+      </h3>
+      <div id="rankingListMobile"></div>
+    </div>
+
+    <!-- 出勤記録フォーム -->
+    <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">出勤記録</h1>
+        <p class="text-gray-600">
+          管理画面は<a href="admin.html" class="text-indigo-600 hover:text-indigo-700 underline font-medium">こちら</a>
+        </p>
       </div>
+      
+      <!-- 位置情報ステータス -->
+      <div id="locationStatus" class="mb-6 rounded-xl p-4 text-center font-semibold"></div>
+      
+      <!-- フォーム -->
+      <form id="attendanceForm" class="space-y-6">
+        <!-- 氏名入力 -->
+        <div>
+          <label for="personName" class="block text-sm font-bold text-gray-700 mb-2">
+            氏名
+          </label>
+          <input 
+            type="text" 
+            id="personName" 
+            placeholder="氏名を入力してください" 
+            required 
+            autocomplete="off"
+            class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 transition duration-200"
+          >
+          <p id="nameError" class="hidden mt-2 text-sm text-red-600 font-medium">
+            この名前は登録されていません
+          </p>
+        </div>
 
-      <button type="submit" id="submitBtn">出勤を記録</button>
-    </form>
+        <!-- 交通経路 -->
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-3">
+            交通経路
+          </label>
+          <div class="space-y-3">
+            <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition duration-200 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input 
+                type="radio" 
+                name="route" 
+                value="家→事務所" 
+                required
+                class="w-5 h-5 text-indigo-600 focus:ring-indigo-500"
+              >
+              <span class="ml-3 text-lg font-medium text-gray-700">家 → 事務所</span>
+            </label>
+            <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition duration-200 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+              <input 
+                type="radio" 
+                name="route" 
+                value="学校→事務所"
+                class="w-5 h-5 text-indigo-600 focus:ring-indigo-500"
+              >
+              <span class="ml-3 text-lg font-medium text-gray-700">学校 → 事務所</span>
+            </label>
+          </div>
+        </div>
 
-    <div class="success-message" id="successMessage">
-      出勤を記録しました！
+        <!-- 送信ボタン -->
+        <button 
+          type="submit" 
+          id="submitBtn"
+          class="w-full py-4 text-lg font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+          出勤を記録
+        </button>
+      </form>
+
+      <!-- 成功メッセージ -->
+      <div id="successMessage" class="hidden mt-6 p-4 bg-green-50 border-2 border-green-500 text-green-800 rounded-xl text-center font-semibold animate-slide-in">
+        出勤を記録しました！
+      </div>
     </div>
   </div>
 
@@ -234,7 +142,7 @@
     const TARGET_LAT = 35.6555726;
     const TARGET_LNG = 139.6994542;
     const DISTANCE_LIMIT = 200;
-    const DISTANCE_BUFFER = 5; // バッファ
+    const DISTANCE_BUFFER = 5;
 
     let people = [];
     let records = [];
@@ -262,15 +170,90 @@
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // 本日の出勤記録を取得
         const today = getDateString(new Date());
-        const recordsSnapshot = await db.collection('records')
+        const todayRecordsSnapshot = await db.collection('records')
           .where('date', '==', today)
           .get();
-        records = recordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        records = todayRecordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        await loadMonthlyRanking();
       } catch (error) {
         console.error('データ読み込みエラー:', error);
       }
+    }
+
+    // 今月のランキングを取得・表示
+    async function loadMonthlyRanking() {
+      try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+
+        const monthlyRecordsSnapshot = await db.collection('records').get();
+        const monthlyRecords = monthlyRecordsSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(r => {
+            if (!r.date) return false;
+            const parts = r.date.split('/');
+            if (parts.length !== 3) return false;
+            return parseInt(parts[0]) === year && parseInt(parts[1]) === month;
+          });
+
+        const rankingData = people.map(person => {
+          const count = monthlyRecords.filter(r => r.personId === person.id).length;
+          return { name: person.name, count: count };
+        }).filter(item => item.count > 0)
+          .sort((a, b) => b.count - a.count);
+
+        updateRankingDisplay(rankingData);
+      } catch (error) {
+        console.error('ランキング取得エラー:', error);
+      }
+    }
+
+    // ランキング表示を更新
+    function updateRankingDisplay(rankingData) {
+      const rankingList = document.getElementById('rankingList');
+      const rankingListMobile = document.getElementById('rankingListMobile');
+      
+      let html = '';
+      
+      if (rankingData.length === 0) {
+        html = '<div class="text-center text-gray-500 py-8">今月の出勤記録はまだありません</div>';
+      } else {
+        html = rankingData.map((item, index) => {
+          const rank = index + 1;
+          let badgeColor = 'bg-indigo-100 text-indigo-700';
+          let rankColor = 'text-indigo-600';
+          
+          if (rank === 1) {
+            badgeColor = 'bg-yellow-100 text-yellow-700';
+            rankColor = 'text-yellow-600';
+          } else if (rank === 2) {
+            badgeColor = 'bg-gray-100 text-gray-700';
+            rankColor = 'text-gray-600';
+          } else if (rank === 3) {
+            badgeColor = 'bg-orange-100 text-orange-700';
+            rankColor = 'text-orange-600';
+          }
+
+          return `
+            <div class="flex items-center gap-4 p-3 mb-2 bg-gray-50 rounded-xl hover:bg-gray-100 transition duration-200">
+              <div class="text-3xl font-bold ${rankColor} w-10 text-center">${rank}</div>
+              <div class="flex-1">
+                <div class="font-bold text-gray-800">${item.name}</div>
+                <div class="text-sm text-gray-600">${item.count}回出勤</div>
+              </div>
+              <span class="px-3 py-1 text-xs font-semibold ${badgeColor} rounded-full">
+                ${rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : ''}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      rankingList.innerHTML = html;
+      rankingListMobile.innerHTML = html;
     }
 
     // 距離計算
@@ -302,16 +285,16 @@
           const status = document.getElementById('locationStatus');
           
           if (distance <= DISTANCE_LIMIT) {
-            status.className = 'location-ok';
+            status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-green-50 border-2 border-green-500 text-green-800';
             status.textContent = `位置情報OK（距離: ${Math.round(distance)}m）`;
           } else {
-            status.className = 'location-ng';
+            status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-red-50 border-2 border-red-500 text-red-800';
             status.textContent = `位置情報NG（距離: ${Math.round(distance)}m - 200m以内に移動してください）`;
           }
         },
         function() {
           const status = document.getElementById('locationStatus');
-          status.className = 'location-ng';
+          status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-red-50 border-2 border-red-500 text-red-800';
           status.textContent = '位置情報の取得に失敗しました';
         }
       );
@@ -322,7 +305,7 @@
 
     // 名前バリデーション
     document.getElementById('personName').addEventListener('input', function() {
-      document.getElementById('nameError').classList.remove('show');
+      document.getElementById('nameError').classList.add('hidden');
     });
 
     // 出勤記録
@@ -333,16 +316,14 @@
       const nameError = document.getElementById('nameError');
       const successMessage = document.getElementById('successMessage');
 
-      // 登録されているか確認
       const person = people.find(p => p.name === nameInput);
       
       if (!person) {
-        nameError.classList.add('show');
+        nameError.classList.remove('hidden');
         document.getElementById('personName').focus();
         return;
       }
 
-      // 本日既に記録済みかチェック
       const today = getDateString(new Date());
       const alreadyRecorded = records.some(r => 
         r.personId === person.id && r.date === today
@@ -386,17 +367,15 @@
         };
 
         await db.collection('records').add(recordData);
-
-        // ローカルのrecordsにも追加
         records.push({ id: Date.now(), ...recordData });
 
-        // 成功メッセージ表示
-        successMessage.classList.add('show');
+        await loadMonthlyRanking();
+
+        successMessage.classList.remove('hidden');
         this.reset();
 
-        // 3秒後に成功メッセージを非表示
         setTimeout(() => {
-          successMessage.classList.remove('show');
+          successMessage.classList.add('hidden');
         }, 3000);
       } catch (error) {
         console.error('記録エラー:', error);
