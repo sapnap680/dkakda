@@ -184,7 +184,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>📝 出勤記録</h1>
+    <h1>出勤記録</h1>
     <div class="subtitle">
       管理画面は<a href="admin.html">こちら</a>
     </div>
@@ -200,11 +200,11 @@
         <label>交通経路:</label>
         <label class="radio-label">
           <input type="radio" name="route" value="家→事務所" required>
-          <span>🏠 家 → 事務所</span>
+          <span>家 → 事務所</span>
         </label>
         <label class="radio-label">
           <input type="radio" name="route" value="学校→事務所">
-          <span>🏫 学校 → 事務所</span>
+          <span>学校 → 事務所</span>
         </label>
       </div>
 
@@ -212,7 +212,7 @@
     </form>
 
     <div class="success-message" id="successMessage">
-      ✓ 出勤を記録しました！
+      出勤を記録しました！
     </div>
   </div>
 
@@ -303,10 +303,10 @@
           
           if (distance <= DISTANCE_LIMIT) {
             status.className = 'location-ok';
-            status.textContent = `✓ 位置情報OK（距離: ${Math.round(distance)}m）`;
+            status.textContent = `位置情報OK（距離: ${Math.round(distance)}m）`;
           } else {
             status.className = 'location-ng';
-            status.textContent = `✗ 位置情報NG（距離: ${Math.round(distance)}m - 200m以内に移動してください）`;
+            status.textContent = `位置情報NG（距離: ${Math.round(distance)}m - 200m以内に移動してください）`;
           }
         },
         function() {
