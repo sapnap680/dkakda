@@ -782,6 +782,11 @@
           </div>
 
           <div>
+            <label for="personFurigana" class="block text-sm font-bold text-gray-700 mb-2">ふりがな:</label>
+            <input type="text" id="personFurigana" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition" placeholder="やまだ たろう">
+          </div>
+
+          <div>
             <label for="homeStation" class="block text-sm font-bold text-gray-700 mb-2">最寄り駅（家）:</label>
             <input type="text" id="homeStation" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
           </div>
@@ -989,12 +994,18 @@
 
       const name = document.getElementById('personName').value;
       const homeStation = document.getElementById('homeStation').value;
+      const furigana = document.getElementById('personFurigana').value;
       const homeFare = parseInt(document.getElementById('homeFare').value);
       const universityStation = document.getElementById('universityStation').value;
       const universityFare = parseInt(document.getElementById('universityFare').value);
 
       if (people.some(p => p.name === name)) {
         alert('この名前は既に登録されています');
+        return;
+      }
+
+      if (!furigana.trim()) {
+        alert('ふりがなを入力してください');
         return;
       }
 
@@ -1005,6 +1016,7 @@
       try {
         const personData = {
           name: name,
+          furigana: furigana,
           homeStation: homeStation,
           homeFare: homeFare,
           universityStation: universityStation,
@@ -1072,8 +1084,15 @@
       }
 
       try {
+        const furigana = prompt('ふりがな:', person.furigana || '');
+        if (furigana === null) return;
+        if (!furigana.trim()) {
+          alert('ふりがなを入力してください');
+          return;
+        }
         const updateData = {
           name: name.trim(),
+          furigana: furigana.trim(),
           homeStation: homeStation.trim(),
           homeFare: homeFare,
           universityStation: universityStation.trim(),
@@ -1161,8 +1180,9 @@
           <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-cyan-200 hover:shadow-lg transition mb-4">
             <div class="text-xl font-bold text-gray-800 mb-3">${p.name}</div>
             <div class="text-sm text-gray-600 mb-4 bg-white p-3 rounded-lg">
-              <span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>) | 
-              <span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>)
+              <div class="mb-1"><span class="font-bold">ふりがな:</span> ${p.furigana || '-'} </div>
+              <div><span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>) | 
+              <span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>)</div>
             </div>
             <div class="grid grid-cols-3 gap-4">
               <div class="bg-white p-4 rounded-lg text-center">

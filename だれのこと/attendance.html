@@ -180,10 +180,15 @@
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // 予測変換（datalist）を更新
+        // 予測変換（datalist）を更新（氏名・ふりがな両方を候補に）
         const datalist = document.getElementById('peopleSuggestions');
         if (datalist) {
-          datalist.innerHTML = people.map(p => `<option value="${p.name}"></option>`).join('');
+          const options = [];
+          people.forEach(p => {
+            if (p.name) options.push(`<option value="${p.name}"></option>`);
+            if (p.furigana) options.push(`<option value="${p.furigana}"></option>`);
+          });
+          datalist.innerHTML = options.join('');
         }
 
         const today = getJSTDateString();
@@ -362,7 +367,14 @@
       const nameError = document.getElementById('nameError');
       const successMessage = document.getElementById('successMessage');
 
-      const person = people.find(p => p.name === nameInput);
+      let person = people.find(p => p.name === nameInput);
+      if (!person) {
+        person = people.find(p => (p.furigana || '') === nameInput);
+        if (person) {
+          // 入力がふりがな一致の場合も、その登録者として扱う
+          document.getElementById('personName').value = person.name;
+        }
+      }
       // 自由記述を許可するため、未登録でもエラーにしない
       nameError.classList.add('hidden');
 
