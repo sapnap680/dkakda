@@ -707,7 +707,7 @@
     <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-2 flex flex-wrap gap-2">
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md" onclick="switchTab('today')">本日の出勤</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('manual')">手動記録</button>
-      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('management')">人員管理</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('management')">人員追加</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('stats')">統計</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('monthly')">月次レポート</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('settings')">設定</button>
@@ -769,10 +769,10 @@
       </div>
     </div>
 
-    <!-- 人員管理タブ -->
+    <!-- 人員追加タブ -->
     <div id="management" class="container hidden">
       <div class="bg-white rounded-2xl shadow-xl p-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">人員管理</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">人員追加</h2>
         
         <h3 class="text-xl font-bold text-gray-800 mb-4 mt-8">新しい人を追加</h3>
         <form id="personForm" class="space-y-4 mb-8">

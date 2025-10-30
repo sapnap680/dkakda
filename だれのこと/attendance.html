@@ -72,8 +72,10 @@
             placeholder="氏名を入力してください" 
             required 
             autocomplete="off"
+            list="peopleSuggestions"
             class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 transition duration-200"
           >
+          <datalist id="peopleSuggestions"></datalist>
           <p id="nameError" class="hidden mt-2 text-sm text-red-600 font-medium">
             この名前は登録されていません
           </p>
@@ -141,7 +143,7 @@
 
     const TARGET_LAT = 35.6555726;
     const TARGET_LNG = 139.6994542;
-    const DISTANCE_LIMIT = 200;
+    const DISTANCE_LIMIT = 800;
     const DISTANCE_BUFFER = 5;
 
     let people = [];
@@ -154,6 +156,14 @@
       const m = String(date.getMonth() + 1).padStart(2, '0');
       const d = String(date.getDate()).padStart(2, '0');
       return `${y}/${m}/${d}`;
+    }
+
+    // 日本時間(JST)の現在日付(YYYY/MM/DD)を返す
+    function getJSTDateString() {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const jst = new Date(utcMs + 9 * 60 * 60000);
+      return getDateString(jst);
     }
 
     // 統一された時刻フォーマット関数
@@ -170,7 +180,13 @@
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        const today = getDateString(new Date());
+        // 予測変換（datalist）を更新
+        const datalist = document.getElementById('peopleSuggestions');
+        if (datalist) {
+          datalist.innerHTML = people.map(p => `<option value="${p.name}"></option>`).join('');
+        }
+
+        const today = getJSTDateString();
         const todayRecordsSnapshot = await db.collection('records')
           .where('date', '==', today)
           .get();
@@ -186,8 +202,10 @@
     async function loadMonthlyRanking() {
       try {
         const now = new Date();
-        const year = now.getFullYear();
-        const month = now.getMonth() + 1;
+        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+        const jstNow = new Date(utcMs + 9 * 60 * 60000);
+        const year = jstNow.getFullYear();
+        const month = jstNow.getMonth() + 1;
 
         const monthlyRecordsSnapshot = await db.collection('records').get();
         const monthlyRecords = monthlyRecordsSnapshot.docs
@@ -317,7 +335,7 @@
             status.textContent = `位置情報OK（距離: ${Math.round(distance)}m）`;
           } else {
             status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-red-50 border-2 border-red-500 text-red-800';
-            status.textContent = `位置情報NG（距離: ${Math.round(distance)}m - 200m以内に移動してください）`;
+            status.textContent = `位置情報NG（距離: ${Math.round(distance)}m - ${DISTANCE_LIMIT}m以内に移動してください）`;
           }
         },
         function() {
@@ -345,16 +363,12 @@
       const successMessage = document.getElementById('successMessage');
 
       const person = people.find(p => p.name === nameInput);
-      
-      if (!person) {
-        nameError.classList.remove('hidden');
-        document.getElementById('personName').focus();
-        return;
-      }
+      // 自由記述を許可するため、未登録でもエラーにしない
+      nameError.classList.add('hidden');
 
-      const today = getDateString(new Date());
+      const today = getJSTDateString();
       const alreadyRecorded = records.some(r => 
-        r.personId === person.id && r.date === today
+        r.date === today && (person ? r.personId === person.id : r.personName === nameInput)
       );
 
       if (alreadyRecorded) {
@@ -383,10 +397,10 @@
 
       try {
         const recordData = {
-          personId: person.id,
-          personName: person.name,
+          personId: person ? person.id : null,
+          personName: person ? person.name : nameInput,
           route: route,
-          date: getDateString(now),
+          date: getJSTDateString(),
           time: getTimeString(now),
           lat: currentPosition.lat,
           lng: currentPosition.lng,
