@@ -389,12 +389,15 @@
           document.getElementById('personName').value = person.name;
         }
       }
-      // 自由記述を許可するため、未登録でもエラーにしない
-      nameError.classList.add('hidden');
+      if (!person) {
+        nameError.classList.remove('hidden');
+        document.getElementById('personName').focus();
+        return;
+      }
 
       const today = getJSTDateString();
       const alreadyRecorded = records.some(r => 
-        r.date === today && (person ? r.personId === person.id : r.personName === nameInput)
+        r.date === today && r.personId === person.id
       );
 
       if (alreadyRecorded) {
@@ -423,8 +426,8 @@
 
       try {
         const recordData = {
-          personId: person ? person.id : null,
-          personName: person ? person.name : nameInput,
+          personId: person.id,
+          personName: person.name,
           route: route,
           date: getJSTDateString(),
           time: getTimeString(now),
