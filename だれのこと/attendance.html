@@ -51,9 +51,7 @@
     <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
       <div class="text-center mb-8">
         <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">出勤記録</h1>
-        <p class="text-gray-600">
-          管理画面は<a href="admin.html" class="text-cyan-600 hover:text-cyan-700 underline font-medium">こちら</a>
-        </p>
+        
       </div>
       
       <!-- 位置情報ステータス -->
@@ -180,15 +178,11 @@
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // 予測変換（datalist）を更新（氏名・ふりがな両方を候補に）
+        // 予測変換（datalist）を更新：初期状態（空欄時）は氏名のみ
         const datalist = document.getElementById('peopleSuggestions');
         if (datalist) {
-          const options = [];
-          people.forEach(p => {
-            if (p.name) options.push(`<option value="${p.name}"></option>`);
-            if (p.furigana) options.push(`<option value="${p.furigana}"></option>`);
-          });
-          datalist.innerHTML = options.join('');
+          const nameOptions = people.filter(p => p.name).map(p => `<option value="${p.name}"></option>`);
+          datalist.innerHTML = nameOptions.join('');
         }
 
         const today = getJSTDateString();
@@ -357,6 +351,26 @@
     // 名前バリデーション
     document.getElementById('personName').addEventListener('input', function() {
       document.getElementById('nameError').classList.add('hidden');
+
+      // 入力値に応じてdatalist候補を切替え
+      const datalist = document.getElementById('peopleSuggestions');
+      if (!datalist) return;
+      const value = this.value.trim();
+      if (value === '') {
+        // 空欄: 氏名（漢字など登録名）だけ
+        datalist.innerHTML = people
+          .filter(p => p.name)
+          .map(p => `<option value="${p.name}"></option>`)
+          .join('');
+      } else {
+        // 入力あり: 氏名 + ふりがな
+        const options = [];
+        people.forEach(p => {
+          if (p.name) options.push(`<option value="${p.name}"></option>`);
+          if (p.furigana) options.push(`<option value="${p.furigana}"></option>`);
+        });
+        datalist.innerHTML = options.join('');
+      }
     });
 
     // 出勤記録
