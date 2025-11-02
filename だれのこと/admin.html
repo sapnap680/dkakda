@@ -253,9 +253,9 @@
         margin: 0 !important;
       }
       #statsPrintContent > div {
-        transform: scale(0.5) !important;
+        transform: scale(0.85) !important;
         transform-origin: top left !important;
-        width: 200% !important;
+        width: 117.65% !important;
         page-break-inside: avoid !important;
         page-break-after: avoid !important;
       }
@@ -263,8 +263,8 @@
         display: table !important;
         border-collapse: collapse;
         width: 100% !important;
-        margin: 8px 0 !important;
-        font-size: 8px !important;
+        margin: 14px 0 !important;
+        font-size: 14px !important;
         page-break-inside: avoid !important;
       }
       #statsPrintContent thead {
@@ -280,8 +280,8 @@
       #statsPrintContent td {
         display: table-cell !important;
         border: 1px solid #ddd !important;
-        padding: 4px !important;
-        font-size: 8px !important;
+        padding: 7px !important;
+        font-size: 14px !important;
         page-break-inside: avoid !important;
       }
       #statsPrintContent tr {
@@ -289,9 +289,9 @@
       }
       #statsPrintContent h2 {
         display: block !important;
-        font-size: 14px !important;
-        margin-bottom: 10px !important;
-        padding-bottom: 8px !important;
+        font-size: 24px !important;
+        margin-bottom: 17px !important;
+        padding-bottom: 14px !important;
       }
       #monthlyReportContent {
         display: block !important;
@@ -1429,28 +1429,28 @@
 
       document.getElementById('statsContent').innerHTML = html || '<p class="text-gray-500 text-center py-8">データがありません</p>';
       
-      // 印刷用コンテンツも更新（50%サイズで縮小して1ページに収める）
+      // 印刷用コンテンツも更新（85%サイズで調整）
       const printHtml = `
-        <div style="page-break-inside: avoid; page-break-after: avoid; transform: scale(0.5); transform-origin: top left; width: 200%;">
-          <h2 style="text-align: center; margin-bottom: 10px; border-bottom: 2px solid #06b6d4; padding-bottom: 8px; font-size: 14px; font-weight: bold;">${title}</h2>
-          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 8px; page-break-inside: avoid;">
+        <div style="page-break-inside: avoid; page-break-after: avoid; transform: scale(0.85); transform-origin: top left; width: 117.65%;">
+          <h2 style="text-align: center; margin-bottom: 17px; border-bottom: 2px solid #06b6d4; padding-bottom: 14px; font-size: 24px; font-weight: bold;">${title}</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 14px; page-break-inside: avoid;">
             <thead>
               <tr style="background-color: #f0f0f0; border-bottom: 1px solid #333; page-break-inside: avoid;">
-                <th style="padding: 4px; text-align: left; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">氏名</th>
-                <th style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">自宅→事務所</th>
-                <th style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">学校→事務所</th>
-                <th style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">合計出勤</th>
-                <th style="padding: 4px; text-align: right; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">交通費合計</th>
+                <th style="padding: 7px; text-align: left; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">氏名</th>
+                <th style="padding: 7px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">自宅→事務所</th>
+                <th style="padding: 7px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">学校→事務所</th>
+                <th style="padding: 7px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">合計出勤</th>
+                <th style="padding: 7px; text-align: right; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">交通費合計</th>
               </tr>
             </thead>
             <tbody>
               ${stats.map((s, i) => `
                 <tr style="${i % 2 === 0 ? 'background-color: #f9f9f9;' : 'background-color: white;'} page-break-inside: avoid;">
-                  <td style="padding: 4px; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">${s.name}</td>
-                  <td style="padding: 4px; text-align: center; border: 1px solid #ddd; font-size: 8px;">${s.homeCount}</td>
-                  <td style="padding: 4px; text-align: center; border: 1px solid #ddd; font-size: 8px;">${s.schoolCount}</td>
-                  <td style="padding: 4px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">${s.total}</td>
-                  <td style="padding: 4px; text-align: right; font-weight: bold; border: 1px solid #ddd; font-size: 8px;">¥${s.totalFare.toLocaleString()}</td>
+                  <td style="padding: 7px; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">${s.name}</td>
+                  <td style="padding: 7px; text-align: center; border: 1px solid #ddd; font-size: 14px;">${s.homeCount}</td>
+                  <td style="padding: 7px; text-align: center; border: 1px solid #ddd; font-size: 14px;">${s.schoolCount}</td>
+                  <td style="padding: 7px; text-align: center; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">${s.total}</td>
+                  <td style="padding: 7px; text-align: right; font-weight: bold; border: 1px solid #ddd; font-size: 14px;">¥${s.totalFare.toLocaleString()}</td>
                 </tr>
               `).join('')}
             </tbody>
