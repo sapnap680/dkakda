@@ -227,7 +227,8 @@
           const count = monthlyRecords.filter(r => r.personId === person.id).length;
           return { name: person.name, count: count };
         }).filter(item => item.count > 0)
-          .sort((a, b) => b.count - a.count);
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3);  // 3位までに制限
 
         updateRankingDisplay(rankingData);
       } catch (error) {
