@@ -182,7 +182,7 @@
               const orderA = a.order || 0;
               const orderB = b.order || 0;
               if (orderA !== orderB) {
-                return orderA - orderB;
+                return orderA - orderB;  // 小さい順
               }
               return (a.name || '').localeCompare(b.name || '');
             });
