@@ -59,24 +59,18 @@
       
       <!-- フォーム -->
       <form id="attendanceForm" class="space-y-6">
-        <!-- 氏名入力 -->
+        <!-- 氏名選択 -->
         <div>
           <label for="personName" class="block text-sm font-bold text-gray-700 mb-2">
             氏名
           </label>
-          <input 
-            type="text" 
+          <select 
             id="personName" 
-            placeholder="氏名を入力してください" 
             required 
-            autocomplete="off"
-            list="peopleSuggestions"
             class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 transition duration-200"
           >
-          <datalist id="peopleSuggestions"></datalist>
-          <p id="nameError" class="hidden mt-2 text-sm text-red-600 font-medium">
-            この名前は登録されていません
-          </p>
+            <option value="">--- 選択してください ---</option>
+          </select>
         </div>
 
         <!-- 交通経路 -->
@@ -178,11 +172,23 @@
         const peopleSnapshot = await db.collection('people').get();
         people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // 予測変換（datalist）を更新：初期状態（空欄時）は氏名のみ
-        const datalist = document.getElementById('peopleSuggestions');
-        if (datalist) {
-          const nameOptions = people.filter(p => p.name).map(p => `<option value="${p.name}"></option>`);
-          datalist.innerHTML = nameOptions.join('');
+        // 氏名選択プルダウンを更新（順序でソート）
+        const personSelect = document.getElementById('personName');
+        if (personSelect) {
+          // 順序でソート（orderが小さい順、同じ場合は名前順）
+          const sortedPeople = [...people]
+            .filter(p => p.name)
+            .sort((a, b) => {
+              const orderA = a.order || 0;
+              const orderB = b.order || 0;
+              if (orderA !== orderB) {
+                return orderA - orderB;
+              }
+              return (a.name || '').localeCompare(b.name || '');
+            });
+          const options = '<option value="">--- 選択してください ---</option>' + 
+            sortedPeople.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+          personSelect.innerHTML = options;
         }
 
         const today = getJSTDateString();
@@ -348,50 +354,22 @@
     checkLocation();
     setInterval(checkLocation, 5000);
 
-    // 名前バリデーション
-    document.getElementById('personName').addEventListener('input', function() {
-      document.getElementById('nameError').classList.add('hidden');
-
-      // 入力値に応じてdatalist候補を切替え
-      const datalist = document.getElementById('peopleSuggestions');
-      if (!datalist) return;
-      const value = this.value.trim();
-      if (value === '') {
-        // 空欄: 氏名（漢字など登録名）だけ
-        datalist.innerHTML = people
-          .filter(p => p.name)
-          .map(p => `<option value="${p.name}"></option>`)
-          .join('');
-      } else {
-        // 入力あり: 氏名 + ふりがな
-        const options = [];
-        people.forEach(p => {
-          if (p.name) options.push(`<option value="${p.name}"></option>`);
-          if (p.furigana) options.push(`<option value="${p.furigana}"></option>`);
-        });
-        datalist.innerHTML = options.join('');
-      }
-    });
 
     // 出勤記録
     document.getElementById('attendanceForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
-      const nameInput = document.getElementById('personName').value.trim();
-      const nameError = document.getElementById('nameError');
+      const personId = document.getElementById('personName').value;
       const successMessage = document.getElementById('successMessage');
 
-      let person = people.find(p => p.name === nameInput);
-      if (!person) {
-        person = people.find(p => (p.furigana || '') === nameInput);
-        if (person) {
-          // 入力がふりがな一致の場合も、その登録者として扱う
-          document.getElementById('personName').value = person.name;
-        }
+      if (!personId) {
+        alert('氏名を選択してください');
+        return;
       }
+
+      const person = people.find(p => p.id === personId);
       if (!person) {
-        nameError.classList.remove('hidden');
-        document.getElementById('personName').focus();
+        alert('選択された人が見つかりません');
         return;
       }
 

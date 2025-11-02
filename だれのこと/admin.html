@@ -230,12 +230,51 @@
         padding: 0 !important;
         margin: 0 !important;
       }
-      .container:not(#monthly) {
+      .container:not(#monthly):not(#stats) {
         display: none !important;
       }
       #monthly {
         display: block !important;
         background: white !important;
+      }
+      #stats {
+        display: block !important;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      #statsPrintContent {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #statsPrintContent table {
+        display: table !important;
+        border-collapse: collapse;
+        width: 100% !important;
+        margin: 16px 0 !important;
+      }
+      #statsPrintContent thead {
+        display: table-header-group !important;
+      }
+      #statsPrintContent tbody {
+        display: table-row-group !important;
+      }
+      #statsPrintContent tr {
+        display: table-row !important;
+      }
+      #statsPrintContent th,
+      #statsPrintContent td {
+        display: table-cell !important;
+        border: 1px solid #ddd !important;
+        padding: 12px !important;
+      }
+      #statsPrintContent h2 {
+        display: block !important;
       }
       #monthlyReportContent {
         display: block !important;
@@ -687,6 +726,11 @@
     .total-section .summary-value {
       font-size: 20px;
     }
+
+    /* 統計ページ印刷用スタイル */
+    .print-only {
+      display: none;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400">
@@ -787,6 +831,12 @@
           </div>
 
           <div>
+            <label for="personOrder" class="block text-sm font-bold text-gray-700 mb-2">表示順序:</label>
+            <input type="number" id="personOrder" min="0" value="0" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition" placeholder="数字が小さいほど上に表示されます">
+            <p class="text-sm text-gray-500 mt-1">数字が小さいほど上に表示されます</p>
+          </div>
+
+          <div>
             <label for="homeStation" class="block text-sm font-bold text-gray-700 mb-2">最寄り駅（家）:</label>
             <input type="text" id="homeStation" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
           </div>
@@ -818,10 +868,14 @@
 
     <!-- 統計タブ -->
     <div id="stats" class="container hidden">
-      <div class="bg-white rounded-2xl shadow-xl p-8">
+      <div class="bg-white rounded-2xl shadow-xl p-8 no-print">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">出勤統計</h2>
+        <button onclick="window.print()" class="w-full mb-6 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+          印刷
+        </button>
         <div id="statsContent"></div>
       </div>
+      <div id="statsPrintContent" class="hidden print-only"></div>
     </div>
 
     <!-- 月次レポートタブ -->
@@ -978,8 +1032,17 @@
     // 手動記録フォーム更新
     function updateManualForm() {
       const select = document.getElementById('manualPersonSelect');
+      // 順序でソート（orderが小さい順、同じ場合は名前順）
+      const sortedPeople = [...people].sort((a, b) => {
+        const orderA = a.order || 0;
+        const orderB = b.order || 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return (a.name || '').localeCompare(b.name || '');
+      });
       const options = '<option value="">--- 選択してください ---</option>' + 
-        people.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        sortedPeople.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
       select.innerHTML = options;
 
       // 今日の日付と現在時刻をデフォルト設定
@@ -995,6 +1058,7 @@
       const name = document.getElementById('personName').value;
       const homeStation = document.getElementById('homeStation').value;
       const furigana = document.getElementById('personFurigana').value;
+      const order = parseInt(document.getElementById('personOrder').value) || 0;
       const homeFare = parseInt(document.getElementById('homeFare').value);
       const universityStation = document.getElementById('universityStation').value;
       const universityFare = parseInt(document.getElementById('universityFare').value);
@@ -1017,6 +1081,7 @@
         const personData = {
           name: name,
           furigana: furigana,
+          order: order,
           homeStation: homeStation,
           homeFare: homeFare,
           universityStation: universityStation,
@@ -1090,9 +1155,15 @@
           alert('ふりがなを入力してください');
           return;
         }
+
+        const orderStr = prompt('表示順序:', person.order || 0);
+        if (orderStr === null) return;
+        const order = parseInt(orderStr) || 0;
+
         const updateData = {
           name: name.trim(),
           furigana: furigana.trim(),
+          order: order,
           homeStation: homeStation.trim(),
           homeFare: homeFare,
           universityStation: universityStation.trim(),
@@ -1170,7 +1241,17 @@
 
     // 人員リスト更新
     function updatePersonList() {
-      const html = people.map(p => {
+      // 順序でソート（orderが小さい順、同じ場合は名前順）
+      const sortedPeople = [...people].sort((a, b) => {
+        const orderA = a.order || 0;
+        const orderB = b.order || 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+        return (a.name || '').localeCompare(b.name || '');
+      });
+
+      const html = sortedPeople.map(p => {
         const count = records.filter(r => r.personId === p.id).length;
         const homeCount = records.filter(r => r.personId === p.id && r.route === '自宅→事務所').length;
         const schoolCount = records.filter(r => r.personId === p.id && r.route === '学校→事務所').length;
@@ -1180,7 +1261,7 @@
           <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-cyan-200 hover:shadow-lg transition mb-4">
             <div class="text-xl font-bold text-gray-800 mb-3">${p.name}</div>
             <div class="text-sm text-gray-600 mb-4 bg-white p-3 rounded-lg">
-              <div class="mb-1"><span class="font-bold">ふりがな:</span> ${p.furigana || '-'} </div>
+              <div class="mb-1"><span class="font-bold">ふりがな:</span> ${p.furigana || '-'} | <span class="font-bold">表示順序:</span> ${p.order || 0}</div>
               <div><span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>) | 
               <span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>)</div>
             </div>
@@ -1279,6 +1360,37 @@
       `;
 
       document.getElementById('statsContent').innerHTML = html || '<p class="text-gray-500 text-center py-8">データがありません</p>';
+      
+      // 印刷用コンテンツも更新
+      const printHtml = `
+        <div style="page-break-after: avoid;">
+          <h2 style="text-align: center; margin-bottom: 24px; border-bottom: 3px solid #06b6d4; padding-bottom: 16px; font-size: 28px; font-weight: bold;">出勤統計</h2>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+            <thead>
+              <tr style="background-color: #f0f0f0; border-bottom: 2px solid #333;">
+                <th style="padding: 12px; text-align: left; font-weight: bold; border: 1px solid #ddd;">氏名</th>
+                <th style="padding: 12px; text-align: center; font-weight: bold; border: 1px solid #ddd;">自宅→事務所</th>
+                <th style="padding: 12px; text-align: center; font-weight: bold; border: 1px solid #ddd;">学校→事務所</th>
+                <th style="padding: 12px; text-align: center; font-weight: bold; border: 1px solid #ddd;">合計出勤</th>
+                <th style="padding: 12px; text-align: right; font-weight: bold; border: 1px solid #ddd;">交通費合計</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${stats.map((s, i) => `
+                <tr style="${i % 2 === 0 ? 'background-color: #f9f9f9;' : 'background-color: white;'}">
+                  <td style="padding: 12px; font-weight: bold; border: 1px solid #ddd;">${s.name}</td>
+                  <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${s.homeCount}</td>
+                  <td style="padding: 12px; text-align: center; border: 1px solid #ddd;">${s.schoolCount}</td>
+                  <td style="padding: 12px; text-align: center; font-weight: bold; border: 1px solid #ddd;">${s.total}</td>
+                  <td style="padding: 12px; text-align: right; font-weight: bold; border: 1px solid #ddd;">¥${s.totalFare.toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+      
+      document.getElementById('statsPrintContent').innerHTML = stats.length > 0 ? printHtml : '<p>データがありません</p>';
     }
 
     // 月選択リストを生成
