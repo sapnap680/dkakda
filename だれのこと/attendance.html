@@ -179,8 +179,9 @@
           const sortedPeople = [...people]
             .filter(p => p.name)
             .sort((a, b) => {
-              const orderA = a.order || 0;
-              const orderB = b.order || 0;
+              // orderが未設定（undefined/null）の場合は大きな数値（999）を設定して後ろに回す
+              const orderA = (a.order !== undefined && a.order !== null) ? Number(a.order) : 999;
+              const orderB = (b.order !== undefined && b.order !== null) ? Number(b.order) : 999;
               if (orderA !== orderB) {
                 return orderA - orderB;  // 小さい順
               }
