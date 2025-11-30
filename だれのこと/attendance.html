@@ -27,26 +27,8 @@
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400 p-4 md:p-8">
-  <!-- ランキングパネル -->
-  <div class="fixed top-4 right-4 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-80 max-h-[80vh] overflow-y-auto hidden lg:block border border-cyan-200">
-    <div class="p-6">
-      <h3 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4 pb-3 border-b-2 border-cyan-500">
-        今月の出勤ランキング
-      </h3>
-      <div id="rankingList"></div>
-    </div>
-  </div>
-
   <!-- メインコンテナ -->
   <div class="max-w-2xl mx-auto">
-    <!-- スマホ用ランキング -->
-    <div class="lg:hidden mb-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border border-cyan-200">
-      <h3 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-4 pb-3 border-b-2 border-cyan-500">
-        今月の出勤ランキング
-      </h3>
-      <div id="rankingListMobile"></div>
-    </div>
-
     <!-- 出勤記録フォーム -->
     <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
       <div class="text-center mb-8">
@@ -113,7 +95,8 @@
 
       <!-- 成功メッセージ -->
       <div id="successMessage" class="hidden mt-6 p-4 bg-green-50 border-2 border-green-500 text-green-800 rounded-xl text-center font-semibold animate-slide-in">
-        出勤を記録しました！
+        <div class="text-lg mb-2">出勤を記録しました！</div>
+        <div id="monthlyCountMessage" class="text-base"></div>
       </div>
     </div>
   </div>
@@ -135,7 +118,7 @@
 
     const TARGET_LAT = 35.6555726;
     const TARGET_LNG = 139.6994542;
-    const DISTANCE_LIMIT = 800;
+    const DISTANCE_LIMIT = 500;
     const DISTANCE_BUFFER = 5;
 
     let people = [];
@@ -197,116 +180,9 @@
           .where('date', '==', today)
           .get();
         records = todayRecordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        await loadMonthlyRanking();
       } catch (error) {
         console.error('データ読み込みエラー:', error);
       }
-    }
-
-    // 今月のランキングを取得・表示
-    async function loadMonthlyRanking() {
-      try {
-        const now = new Date();
-        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-        const jstNow = new Date(utcMs + 9 * 60 * 60000);
-        const year = jstNow.getFullYear();
-        const month = jstNow.getMonth() + 1;
-
-        const monthlyRecordsSnapshot = await db.collection('records').get();
-        const monthlyRecords = monthlyRecordsSnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(r => {
-            if (!r.date) return false;
-            const parts = r.date.split('/');
-            if (parts.length !== 3) return false;
-            return parseInt(parts[0]) === year && parseInt(parts[1]) === month;
-          });
-
-        const rankingData = people.map(person => {
-          const count = monthlyRecords.filter(r => r.personId === person.id).length;
-          return { name: person.name, count: count };
-        }).filter(item => item.count > 0)
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 3);  // 3位までに制限
-
-        updateRankingDisplay(rankingData);
-      } catch (error) {
-        console.error('ランキング取得エラー:', error);
-      }
-    }
-
-    // ランキング表示を更新
-    function updateRankingDisplay(rankingData) {
-      const rankingList = document.getElementById('rankingList');
-      const rankingListMobile = document.getElementById('rankingListMobile');
-      
-      let html = '';
-      
-      if (rankingData.length === 0) {
-        html = '<div class="text-center text-gray-500 py-8">今月の出勤記録はまだありません</div>';
-      } else {
-        html = rankingData.map((item, index) => {
-          const rank = index + 1;
-          let badgeColor = 'bg-indigo-100 text-indigo-700';
-          let rankColor = 'text-indigo-600';
-          
-          if (rank === 1) {
-            badgeColor = 'bg-yellow-100 text-yellow-700';
-            rankColor = 'text-yellow-600';
-          } else if (rank === 2) {
-            badgeColor = 'bg-gray-100 text-gray-700';
-            rankColor = 'text-gray-600';
-          } else if (rank === 3) {
-            badgeColor = 'bg-orange-100 text-orange-700';
-            rankColor = 'text-orange-600';
-          }
-
-          // メダル・ランクアイコンデザイン
-          let rankIcon = '';
-          if (rank <= 3) {
-            let medalBg = '';
-            let medalBorder = '';
-            if (rank === 1) {
-              medalBg = 'bg-gradient-to-br from-cyan-400 to-blue-600';
-              medalBorder = 'border-cyan-300';
-            } else if (rank === 2) {
-              medalBg = 'bg-gradient-to-br from-blue-300 to-blue-500';
-              medalBorder = 'border-blue-300';
-            } else if (rank === 3) {
-              medalBg = 'bg-gradient-to-br from-teal-400 to-cyan-600';
-              medalBorder = 'border-teal-300';
-            }
-            rankIcon = `
-              <div class="relative flex-shrink-0">
-                <div class="w-12 h-12 ${medalBg} rounded-full border-2 ${medalBorder} shadow-lg flex items-center justify-center">
-                  <span class="text-white font-bold text-xl">${rank}</span>
-                </div>
-                <div class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full"></div>
-              </div>
-            `;
-          } else {
-            rankIcon = `
-              <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-full flex items-center justify-center flex-shrink-0 border-2 border-blue-200">
-                <span class="text-xl font-bold text-blue-600">${rank}</span>
-              </div>
-            `;
-          }
-
-          return `
-            <div class="flex items-center gap-4 p-3 mb-2 bg-gray-50 rounded-xl hover:bg-gray-100 hover:shadow-md transition duration-200">
-              ${rankIcon}
-              <div class="flex-1">
-                <div class="font-bold text-gray-800">${item.name}</div>
-                <div class="text-sm text-gray-600">${item.count}回出勤</div>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      rankingList.innerHTML = html;
-      rankingListMobile.innerHTML = html;
     }
 
     // 距離計算
@@ -368,7 +244,7 @@
         alert('氏名を選択してください');
         return;
       }
-
+      
       const person = people.find(p => p.id === personId);
       if (!person) {
         alert('選択された人が見つかりません');
@@ -397,12 +273,12 @@
         return;
       }
 
-      const route = document.querySelector('input[name="route"]:checked').value;
-      const now = new Date();
+        const route = document.querySelector('input[name="route"]:checked').value;
+        const now = new Date();
 
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = '記録中...';
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '記録中...';
 
       try {
         const recordData = {
@@ -420,14 +296,50 @@
         await db.collection('records').add(recordData);
         records.push({ id: Date.now(), ...recordData });
 
-        await loadMonthlyRanking();
+        // 今月の出勤回数を計算
+        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+        const jstNow = new Date(utcMs + 9 * 60 * 60000);
+        const year = jstNow.getFullYear();
+        const month = jstNow.getMonth() + 1;
 
+        // 今月の記録を取得
+        const monthlyRecordsSnapshot = await db.collection('records').get();
+        const monthlyRecords = monthlyRecordsSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(r => {
+            if (!r.date || r.personId !== person.id) return false;
+            const parts = r.date.split('/');
+            if (parts.length !== 3) return false;
+            return parseInt(parts[0]) === year && parseInt(parts[1]) === month;
+          });
+
+        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
+        const dateMap = new Map();
+        monthlyRecords.forEach(record => {
+          const date = record.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, record);
+          } else {
+            const existing = dateMap.get(date);
+            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+            if (currentTime > existingTime) {
+              dateMap.set(date, record);
+            }
+          }
+        });
+        const monthlyCount = dateMap.size;
+
+        // 成功メッセージを更新
+        const monthlyCountMessage = document.getElementById('monthlyCountMessage');
+        monthlyCountMessage.textContent = `今月は${monthlyCount}回来ました`;
+        
         successMessage.classList.remove('hidden');
         this.reset();
 
         setTimeout(() => {
           successMessage.classList.add('hidden');
-        }, 3000);
+        }, 5000);
       } catch (error) {
         console.error('記録エラー:', error);
         alert('記録に失敗しました');

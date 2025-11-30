@@ -233,11 +233,18 @@
       .container:not(#monthly):not(#stats) {
         display: none !important;
       }
-      #monthly {
+      /* 印刷時は、hiddenクラスが付いていない（表示されている）タブのみを表示 */
+      #monthly.hidden {
+        display: none !important;
+      }
+      #monthly:not(.hidden) {
         display: block !important;
         background: white !important;
       }
-      #stats {
+      #stats.hidden {
+        display: none !important;
+      }
+      #stats:not(.hidden) {
         display: block !important;
         background: white !important;
       }
@@ -247,7 +254,11 @@
       .print-only {
         display: block !important;
       }
-      #statsPrintContent {
+      /* 統計タブが非表示の場合は統計の印刷コンテンツも非表示 */
+      #stats.hidden #statsPrintContent {
+        display: none !important;
+      }
+      #stats:not(.hidden) #statsPrintContent {
         display: block !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -288,7 +299,12 @@
         margin-bottom: 12px !important;
         padding-bottom: 10px !important;
       }
-      #monthlyReportContent {
+      /* 月次レポートタブが非表示の場合は月次レポートの印刷コンテンツも非表示 */
+      #monthly.hidden ~ #monthlyReportContent,
+      #monthly.hidden #monthlyReportContent {
+        display: none !important;
+      }
+      #monthly:not(.hidden) #monthlyReportContent {
         display: block !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -766,6 +782,7 @@
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('management')">人員追加</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('stats')">統計</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('monthly')">月次レポート</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('search')">検索</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('settings')">設定</button>
     </div>
   </div>
@@ -859,6 +876,12 @@
           </div>
 
           <div>
+            <label for="homePassFare" class="block text-sm font-bold text-gray-700 mb-2">定期料金（自宅→事務所、10回以上適用） (円):</label>
+            <input type="number" id="homePassFare" min="0" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition" placeholder="未設定の場合は通常料金を使用">
+            <p class="text-sm text-gray-500 mt-1">10回以上の場合、この定期料金が適用されます（未設定の場合は通常料金）</p>
+          </div>
+
+          <div>
             <label for="universityStation" class="block text-sm font-bold text-gray-700 mb-2">大学最寄り駅:</label>
             <input type="text" id="universityStation" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
           </div>
@@ -866,6 +889,12 @@
           <div>
             <label for="universityFare" class="block text-sm font-bold text-gray-700 mb-2">往復交通費（学校→事務所） (円):</label>
             <input type="number" id="universityFare" min="0" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+          </div>
+
+          <div>
+            <label for="universityPassFare" class="block text-sm font-bold text-gray-700 mb-2">定期料金（学校→事務所、10回以上適用） (円):</label>
+            <input type="number" id="universityPassFare" min="0" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition" placeholder="未設定の場合は通常料金を使用">
+            <p class="text-sm text-gray-500 mt-1">10回以上の場合、この定期料金が適用されます（未設定の場合は通常料金）</p>
           </div>
 
           <button type="submit" id="addPersonBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
@@ -916,6 +945,34 @@
       </div>
 
       <div id="monthlyReportContent"></div>
+    </div>
+
+    <!-- 検索タブ -->
+    <div id="search" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">出勤記録検索</h2>
+        
+        <div class="mb-6">
+          <label for="searchPersonName" class="block text-sm font-bold text-gray-700 mb-2">氏名で検索:</label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="searchPersonName" 
+              placeholder="氏名を入力してください" 
+              class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition"
+              onkeyup="if(event.key==='Enter') searchRecords()"
+            >
+            <button 
+              onclick="searchRecords()" 
+              class="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl"
+            >
+              検索
+            </button>
+          </div>
+        </div>
+
+        <div id="searchResults"></div>
+      </div>
     </div>
 
     <!-- 設定タブ -->
@@ -1044,6 +1101,9 @@
         case 'manual':
           updateManualForm();
           break;
+        case 'search':
+          // 検索タブは特に処理なし
+          break;
         case 'settings':
           // 設定タブは特に処理なし
           break;
@@ -1081,8 +1141,10 @@
       const furigana = document.getElementById('personFurigana').value;
       const order = parseInt(document.getElementById('personOrder').value) || 0;
       const homeFare = parseInt(document.getElementById('homeFare').value);
+      const homePassFare = document.getElementById('homePassFare').value ? parseInt(document.getElementById('homePassFare').value) : null;
       const universityStation = document.getElementById('universityStation').value;
       const universityFare = parseInt(document.getElementById('universityFare').value);
+      const universityPassFare = document.getElementById('universityPassFare').value ? parseInt(document.getElementById('universityPassFare').value) : null;
 
       if (people.some(p => p.name === name)) {
         alert('この名前は既に登録されています');
@@ -1105,8 +1167,10 @@
           order: order,
           homeStation: homeStation,
           homeFare: homeFare,
+          homePassFare: homePassFare,
           universityStation: universityStation,
           universityFare: universityFare,
+          universityPassFare: universityPassFare,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -1181,14 +1245,24 @@
         if (orderStr === null) return;
         const order = parseInt(orderStr) || 0;
 
+        const homePassFareStr = prompt('定期料金（自宅→事務所、10回以上適用）円（未設定の場合は空欄）:', person.homePassFare || '');
+        if (homePassFareStr === null) return;
+        const homePassFare = homePassFareStr.trim() === '' ? null : (isNaN(parseInt(homePassFareStr)) ? null : parseInt(homePassFareStr));
+
+        const universityPassFareStr = prompt('定期料金（学校→事務所、10回以上適用）円（未設定の場合は空欄）:', person.universityPassFare || '');
+        if (universityPassFareStr === null) return;
+        const universityPassFare = universityPassFareStr.trim() === '' ? null : (isNaN(parseInt(universityPassFareStr)) ? null : parseInt(universityPassFareStr));
+
         const updateData = {
           name: name.trim(),
           furigana: furigana.trim(),
           order: order,
           homeStation: homeStation.trim(),
           homeFare: homeFare,
+          homePassFare: homePassFare,
           universityStation: universityStation.trim(),
-          universityFare: universityFare
+          universityFare: universityFare,
+          universityPassFare: universityPassFare
         };
 
         await db.collection('people').doc(id).update(updateData);
@@ -1273,18 +1347,56 @@
       });
 
       const html = sortedPeople.map(p => {
-        const count = records.filter(r => r.personId === p.id).length;
-        const homeCount = records.filter(r => r.personId === p.id && r.route === '自宅→事務所').length;
-        const schoolCount = records.filter(r => r.personId === p.id && r.route === '学校→事務所').length;
-        const totalFare = p.homeFare * homeCount + p.universityFare * schoolCount;
+        const pRecords = records.filter(r => r.personId === p.id);
+        
+        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
+        const dateMap = new Map();
+        pRecords.forEach(record => {
+          const date = record.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, record);
+          } else {
+            // 既存の記録と比較して、新しい方を保持
+            const existing = dateMap.get(date);
+            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+            if (currentTime > existingTime) {
+              dateMap.set(date, record);
+            }
+          }
+        });
+        
+        const uniqueDateRecords = Array.from(dateMap.values());
+        const count = uniqueDateRecords.length;
+        const homeCount = uniqueDateRecords.filter(r => r.route === '自宅→事務所').length;
+        const schoolCount = uniqueDateRecords.filter(r => r.route === '学校→事務所').length;
+        
+        // 定期料金の適用（10回以上来たら定期扱いで定期料金1回分のみ）
+        let homeTotalFare = 0;
+        if (homeCount >= 10 && p.homePassFare) {
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          homeTotalFare = p.homePassFare;
+        } else {
+          homeTotalFare = p.homeFare * homeCount;
+        }
+        
+        let universityTotalFare = 0;
+        if (schoolCount >= 10 && p.universityPassFare) {
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          universityTotalFare = p.universityPassFare;
+        } else {
+          universityTotalFare = p.universityFare * schoolCount;
+        }
+        
+        const totalFare = homeTotalFare + universityTotalFare;
         
         return `
           <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-cyan-200 hover:shadow-lg transition mb-4">
             <div class="text-xl font-bold text-gray-800 mb-3">${p.name}</div>
             <div class="text-sm text-gray-600 mb-4 bg-white p-3 rounded-lg">
               <div class="mb-1"><span class="font-bold">ふりがな:</span> ${p.furigana || '-'} | <span class="font-bold">表示順序:</span> ${p.order || 0}</div>
-              <div><span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>) | 
-              <span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>)</div>
+              <div class="mb-1"><span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>${p.homePassFare ? ` / 定期: ¥${p.homePassFare.toLocaleString()}` : ''})</div>
+              <div><span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>${p.universityPassFare ? ` / 定期: ¥${p.universityPassFare.toLocaleString()}` : ''})</div>
             </div>
             <div class="grid grid-cols-3 gap-4">
               <div class="bg-white p-4 rounded-lg text-center">
@@ -1388,11 +1500,52 @@
 
       const stats = people.map(p => {
         const pRecords = filteredRecords.filter(r => r.personId === p.id);
-        const homeCount = pRecords.filter(r => r.route === '自宅→事務所').length;
-        const schoolCount = pRecords.filter(r => r.route === '学校→事務所').length;
-        const totalFare = p.homeFare * homeCount + p.universityFare * schoolCount;
+        
+        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
+        const uniqueDateRecords = [];
+        const dateMap = new Map();
+        
+        // 日付ごとに最新の記録を保持（timestampでソート）
+        pRecords.forEach(record => {
+          const date = record.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, record);
+          } else {
+            // 既存の記録と比較して、新しい方を保持
+            const existing = dateMap.get(date);
+            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+            if (currentTime > existingTime) {
+              dateMap.set(date, record);
+            }
+          }
+        });
+        
+        uniqueDateRecords.push(...dateMap.values());
+        
+        const homeCount = uniqueDateRecords.filter(r => r.route === '自宅→事務所').length;
+        const schoolCount = uniqueDateRecords.filter(r => r.route === '学校→事務所').length;
+        
+        // 定期料金の適用（10回以上来たら定期扱いで定期料金1回分のみ）
+        let homeTotalFare = 0;
+        if (homeCount >= 10 && p.homePassFare) {
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          homeTotalFare = p.homePassFare;
+        } else {
+          homeTotalFare = p.homeFare * homeCount;
+        }
+        
+        let universityTotalFare = 0;
+        if (schoolCount >= 10 && p.universityPassFare) {
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          universityTotalFare = p.universityPassFare;
+        } else {
+          universityTotalFare = p.universityFare * schoolCount;
+        }
+        
+        const totalFare = homeTotalFare + universityTotalFare;
 
-        return { name: p.name, homeCount, schoolCount, totalFare, total: pRecords.length };
+        return { name: p.name, homeCount, schoolCount, totalFare, total: uniqueDateRecords.length };
       });
 
       // 交通費の総合計を計算
@@ -1563,12 +1716,49 @@
       // 人ごとにレポート作成
       const reportsHtml = people.map(person => {
         const personRecords = monthRecords.filter(r => r.personId === person.id);
-        const homeCount = personRecords.filter(r => r.route === '自宅→事務所').length;
-        const schoolCount = personRecords.filter(r => r.route === '学校→事務所').length;
-        const totalFare = person.homeFare * homeCount + person.universityFare * schoolCount;
         
-        // 出勤日のリスト
-        const attendanceDates = personRecords.map(r => r.date);
+        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
+        const dateMap = new Map();
+        personRecords.forEach(record => {
+          const date = record.date;
+          if (!dateMap.has(date)) {
+            dateMap.set(date, record);
+          } else {
+            // 既存の記録と比較して、新しい方を保持
+            const existing = dateMap.get(date);
+            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+            if (currentTime > existingTime) {
+              dateMap.set(date, record);
+            }
+          }
+        });
+        
+        const uniqueDateRecords = Array.from(dateMap.values());
+        const homeCount = uniqueDateRecords.filter(r => r.route === '自宅→事務所').length;
+        const schoolCount = uniqueDateRecords.filter(r => r.route === '学校→事務所').length;
+        
+        // 定期料金の適用（10回目以降のみ定期料金、それ以降何回来ても定期料金は1回分のみ）
+        let homeTotalFare = 0;
+        if (homeCount >= 10 && person.homePassFare) {
+          // 最初の9回は通常料金、10回目以降は定期料金（1回分のみ）
+          homeTotalFare = person.homeFare * 9 + person.homePassFare;
+        } else {
+          homeTotalFare = person.homeFare * homeCount;
+        }
+        
+        let universityTotalFare = 0;
+        if (schoolCount >= 10 && person.universityPassFare) {
+          // 最初の9回は通常料金、10回目以降は定期料金（1回分のみ）
+          universityTotalFare = person.universityFare * 9 + person.universityPassFare;
+        } else {
+          universityTotalFare = person.universityFare * schoolCount;
+        }
+        
+        const totalFare = homeTotalFare + universityTotalFare;
+        
+        // 出勤日のリスト（重複除去）
+        const attendanceDates = Array.from(new Set(uniqueDateRecords.map(r => r.date)));
 
         return `
           <div class="print-page">
@@ -1589,7 +1779,7 @@
                 </tr>
                 <tr>
                   <td>自宅 往復交通費</td>
-                  <td>¥${person.homeFare.toLocaleString()}</td>
+                  <td>¥${person.homeFare.toLocaleString()}${person.homePassFare ? ` (定期: ¥${person.homePassFare.toLocaleString()})` : ''}</td>
                 </tr>
                 <tr>
                   <td>大学 最寄り駅</td>
@@ -1597,7 +1787,7 @@
                 </tr>
                 <tr>
                   <td>大学 往復交通費</td>
-                  <td>¥${person.universityFare.toLocaleString()}</td>
+                  <td>¥${person.universityFare.toLocaleString()}${person.universityPassFare ? ` (定期: ¥${person.universityPassFare.toLocaleString()})` : ''}</td>
                 </tr>
               </table>
             </div>
@@ -1617,7 +1807,7 @@
                   </div>
                   <div class="summary-pair">
                     <div class="summary-label">小計</div>
-                    <div class="summary-value">¥${(person.homeFare * homeCount).toLocaleString()}</div>
+                    <div class="summary-value">¥${homeTotalFare.toLocaleString()}${homeCount >= 10 && person.homePassFare ? ' (定期適用)' : ''}</div>
                   </div>
                 </div>
                 <div class="summary-row">
@@ -1627,7 +1817,7 @@
                   </div>
                   <div class="summary-pair">
                     <div class="summary-label">小計</div>
-                    <div class="summary-value">¥${(person.universityFare * schoolCount).toLocaleString()}</div>
+                    <div class="summary-value">¥${universityTotalFare.toLocaleString()}${schoolCount >= 10 && person.universityPassFare ? ' (定期適用)' : ''}</div>
                   </div>
                 </div>
               </div>
@@ -1785,6 +1975,113 @@
         updateTodayStats();
         updateStats();
         updateManualForm();
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // 検索機能
+    async function searchRecords() {
+      const searchName = document.getElementById('searchPersonName').value.trim();
+      const resultsDiv = document.getElementById('searchResults');
+      
+      if (!searchName) {
+        resultsDiv.innerHTML = '<p class="text-gray-500 text-center py-8">氏名を入力してください</p>';
+        return;
+      }
+
+      // 名前で人を検索（部分一致）
+      const matchedPeople = people.filter(p => 
+        p.name.includes(searchName) || (p.furigana && p.furigana.includes(searchName))
+      );
+
+      if (matchedPeople.length === 0) {
+        resultsDiv.innerHTML = '<p class="text-gray-500 text-center py-8">該当する人が見つかりませんでした</p>';
+        return;
+      }
+
+      // 各人の出勤記録を取得
+      let allRecordsHtml = '';
+      
+      for (const person of matchedPeople) {
+        const personRecords = records.filter(r => r.personId === person.id)
+          .sort((a, b) => {
+            // 日付でソート（新しい順）
+            if (!a.date || !b.date) return 0;
+            const dateA = a.date.split('/').map(Number);
+            const dateB = b.date.split('/').map(Number);
+            const timeA = new Date(dateA[0], dateA[1] - 1, dateA[2]).getTime();
+            const timeB = new Date(dateB[0], dateB[1] - 1, dateB[2]).getTime();
+            return timeB - timeA;
+          });
+
+        if (personRecords.length === 0) {
+          allRecordsHtml += `
+            <div class="mb-6 bg-white rounded-xl shadow-md p-6 border-2 border-gray-200">
+              <h3 class="text-xl font-bold text-gray-800 mb-4">${person.name}</h3>
+              <p class="text-gray-500">出勤記録はありません</p>
+            </div>
+          `;
+          continue;
+        }
+
+        allRecordsHtml += `
+          <div class="mb-6 bg-white rounded-xl shadow-md p-6 border-2 border-cyan-200">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 pb-2 border-b-2 border-cyan-500">${person.name} (${personRecords.length}件)</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead>
+                  <tr class="bg-gray-100 border-b-2 border-gray-300">
+                    <th class="px-4 py-2 text-left font-bold text-black">日付</th>
+                    <th class="px-4 py-2 text-left font-bold text-black">時刻</th>
+                    <th class="px-4 py-2 text-left font-bold text-black">経路</th>
+                    <th class="px-4 py-2 text-left font-bold text-black">距離</th>
+                    <th class="px-4 py-2 text-center font-bold text-black">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${personRecords.map((r, i) => `
+                    <tr class="${i % 2 === 0 ? 'bg-cyan-50' : 'bg-white'} hover:bg-cyan-100 transition">
+                      <td class="px-4 py-2 text-gray-800">${r.date || '-'}</td>
+                      <td class="px-4 py-2 text-gray-700">${r.time || '-'}</td>
+                      <td class="px-4 py-2 text-gray-700">${r.route || '-'}</td>
+                      <td class="px-4 py-2 text-gray-700">${r.distance ? Math.round(r.distance) + 'm' : (r.manual ? '手動記録' : '-')}</td>
+                      <td class="px-4 py-2 text-center">
+                        <button onclick="deleteRecord('${r.id}', '${person.name}')" class="px-3 py-1 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition text-sm">削除</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      resultsDiv.innerHTML = allRecordsHtml;
+    }
+
+    // 記録を削除
+    async function deleteRecord(recordId, personName) {
+      if (!confirm(`「${personName}」の出勤記録を削除しますか？`)) {
+        return;
+      }
+
+      try {
+        await db.collection('records').doc(recordId).delete();
+        
+        // ローカルデータからも削除
+        records = records.filter(r => r.id !== recordId);
+        
+        // 検索結果を更新
+        searchRecords();
+        
+        // 他の表示も更新
+        updateTodayStats();
+        updateStats();
+        
+        alert('記録を削除しました');
       } catch (error) {
         console.error('削除エラー:', error);
         alert('削除に失敗しました: ' + error.message);
