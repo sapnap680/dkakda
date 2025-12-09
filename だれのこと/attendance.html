@@ -203,12 +203,6 @@
     function checkLocation() {
       if (!navigator.geolocation) return;
 
-      const options = {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      };
-
       navigator.geolocation.getCurrentPosition(
         function(position) {
           currentPosition = {
@@ -231,8 +225,7 @@
           const status = document.getElementById('locationStatus');
           status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-red-50 border-2 border-red-500 text-red-800';
           status.textContent = '位置情報の取得に失敗しました';
-        },
-        options
+        }
       );
     }
 
@@ -268,40 +261,15 @@
         return;
       }
 
-      // 最新の位置情報を取得
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.disabled = true;
-      submitBtn.textContent = '位置情報を取得中...';
+      if (!currentPosition) {
+        alert('位置情報を取得できません');
+        return;
+      }
 
-      try {
-        const position = await new Promise((resolve, reject) => {
-          const options = {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          };
-          navigator.geolocation.getCurrentPosition(resolve, reject, options);
-        });
-
-        const latestPosition = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-
-        const distance = getDistance(TARGET_LAT, TARGET_LNG, latestPosition.lat, latestPosition.lng);
-        
-        if (distance > DISTANCE_LIMIT + DISTANCE_BUFFER) {
-          alert(`位置情報の距離が${Math.round(distance)}mです。${DISTANCE_LIMIT}m以内に移動してください。`);
-          submitBtn.disabled = false;
-          submitBtn.textContent = '出勤記録';
-          return;
-        }
-
-        currentPosition = latestPosition;
-      } catch (error) {
-        alert('位置情報の取得に失敗しました。もう一度お試しください。');
-        submitBtn.disabled = false;
-        submitBtn.textContent = '出勤記録';
+      const distance = getDistance(TARGET_LAT, TARGET_LNG, currentPosition.lat, currentPosition.lng);
+      
+      if (distance > DISTANCE_LIMIT + DISTANCE_BUFFER) {
+        alert(`位置情報の距離が${Math.round(distance)}mです。${DISTANCE_LIMIT}m以内に移動してください。`);
         return;
       }
 
