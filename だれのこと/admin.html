@@ -1713,28 +1713,34 @@
                parseInt(parts[1]) === month;
       });
 
-      // 人ごとにレポート作成
-      const reportsHtml = people.map(person => {
-        const personRecords = monthRecords.filter(r => r.personId === person.id);
-        
-        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
-        const dateMap = new Map();
-        personRecords.forEach(record => {
-          const date = record.date;
-          if (!dateMap.has(date)) {
-            dateMap.set(date, record);
-          } else {
-            // 既存の記録と比較して、新しい方を保持
-            const existing = dateMap.get(date);
-            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
-            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
-            if (currentTime > existingTime) {
+      // 人ごとにレポート作成（その月に一度も来ていない人は除外）
+      const reportsHtml = people
+        .map(person => {
+          const personRecords = monthRecords.filter(r => r.personId === person.id);
+          
+          // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
+          const dateMap = new Map();
+          personRecords.forEach(record => {
+            const date = record.date;
+            if (!dateMap.has(date)) {
               dateMap.set(date, record);
+            } else {
+              // 既存の記録と比較して、新しい方を保持
+              const existing = dateMap.get(date);
+              const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+              const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+              if (currentTime > existingTime) {
+                dateMap.set(date, record);
+              }
             }
+          });
+          
+          const uniqueDateRecords = Array.from(dateMap.values());
+          
+          // その月に一度も来ていない場合はnullを返す
+          if (uniqueDateRecords.length === 0) {
+            return null;
           }
-        });
-        
-        const uniqueDateRecords = Array.from(dateMap.values());
         const homeCount = uniqueDateRecords.filter(r => r.route === '自宅→事務所').length;
         const schoolCount = uniqueDateRecords.filter(r => r.route === '学校→事務所').length;
         
@@ -1837,7 +1843,9 @@
             </div>
           </div>
         `;
-      }).join('');
+        })
+        .filter(html => html !== null)  // その月に一度も来ていない人を除外
+        .join('');
 
       document.getElementById('monthlyReportContent').innerHTML = reportsHtml || '<p>データがありません</p>';
     }
