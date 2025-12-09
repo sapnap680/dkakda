@@ -1738,19 +1738,19 @@
         const homeCount = uniqueDateRecords.filter(r => r.route === '自宅→事務所').length;
         const schoolCount = uniqueDateRecords.filter(r => r.route === '学校→事務所').length;
         
-        // 定期料金の適用（10回目以降のみ定期料金、それ以降何回来ても定期料金は1回分のみ）
+        // 定期料金の適用（10回以上来たら定期扱いで定期料金1回分のみ）
         let homeTotalFare = 0;
         if (homeCount >= 10 && person.homePassFare) {
-          // 最初の9回は通常料金、10回目以降は定期料金（1回分のみ）
-          homeTotalFare = person.homeFare * 9 + person.homePassFare;
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          homeTotalFare = person.homePassFare;
         } else {
           homeTotalFare = person.homeFare * homeCount;
         }
         
         let universityTotalFare = 0;
         if (schoolCount >= 10 && person.universityPassFare) {
-          // 最初の9回は通常料金、10回目以降は定期料金（1回分のみ）
-          universityTotalFare = person.universityFare * 9 + person.universityPassFare;
+          // 10回以上来たら定期扱いで定期料金1回分のみ
+          universityTotalFare = person.universityPassFare;
         } else {
           universityTotalFare = person.universityFare * schoolCount;
         }

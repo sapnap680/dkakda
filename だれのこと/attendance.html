@@ -203,6 +203,12 @@
     function checkLocation() {
       if (!navigator.geolocation) return;
 
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      };
+
       navigator.geolocation.getCurrentPosition(
         function(position) {
           currentPosition = {
@@ -225,7 +231,8 @@
           const status = document.getElementById('locationStatus');
           status.className = 'mb-6 rounded-xl p-4 text-center font-semibold bg-red-50 border-2 border-red-500 text-red-800';
           status.textContent = '位置情報の取得に失敗しました';
-        }
+        },
+        options
       );
     }
 
@@ -261,24 +268,49 @@
         return;
       }
 
-      if (!currentPosition) {
-        alert('位置情報を取得できません');
+      // 最新の位置情報を取得
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '位置情報を取得中...';
+
+      try {
+        const position = await new Promise((resolve, reject) => {
+          const options = {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          };
+          navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        });
+
+        const latestPosition = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+
+        const distance = getDistance(TARGET_LAT, TARGET_LNG, latestPosition.lat, latestPosition.lng);
+        
+        if (distance > DISTANCE_LIMIT + DISTANCE_BUFFER) {
+          alert(`位置情報の距離が${Math.round(distance)}mです。${DISTANCE_LIMIT}m以内に移動してください。`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '出勤記録';
+          return;
+        }
+
+        currentPosition = latestPosition;
+      } catch (error) {
+        alert('位置情報の取得に失敗しました。もう一度お試しください。');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '出勤記録';
         return;
       }
 
-      const distance = getDistance(TARGET_LAT, TARGET_LNG, currentPosition.lat, currentPosition.lng);
-      
-      if (distance > DISTANCE_LIMIT + DISTANCE_BUFFER) {
-        alert(`位置情報の距離が${Math.round(distance)}mです。${DISTANCE_LIMIT}m以内に移動してください。`);
-        return;
-      }
+      const route = document.querySelector('input[name="route"]:checked').value;
+      const now = new Date();
 
-        const route = document.querySelector('input[name="route"]:checked').value;
-        const now = new Date();
-
-        const submitBtn = document.getElementById('submitBtn');
-        submitBtn.disabled = true;
-        submitBtn.textContent = '記録中...';
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '記録中...';
 
       try {
         const recordData = {
@@ -333,7 +365,7 @@
         // 成功メッセージを更新
         const monthlyCountMessage = document.getElementById('monthlyCountMessage');
         monthlyCountMessage.textContent = `今月は${monthlyCount}回来ました`;
-        
+
         successMessage.classList.remove('hidden');
         this.reset();
 
