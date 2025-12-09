@@ -1667,7 +1667,10 @@
       for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month - 1, day);
         const dayOfWeek = date.getDay();
-        const dateStr = `${year}/${month}/${day}`;
+        // 日付形式を統一（ゼロ埋め）: YYYY/MM/DD
+        const monthStr = String(month).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const dateStr = `${year}/${monthStr}/${dayStr}`;
         const hasAttendance = attendanceDates.includes(dateStr);
 
         let className = '';
@@ -1860,9 +1863,11 @@
       const timeInput = document.getElementById('manualTime').value;
       const route = document.querySelector('input[name="manualRoute"]:checked').value;
 
-      // 日付フォーマット変換 (YYYY-MM-DD → YYYY/MM/DD)
+      // 日付フォーマット変換 (YYYY-MM-DD → YYYY/MM/DD、ゼロ埋め)
       const [year, month, day] = dateInput.split('-');
-      const formattedDate = `${year}/${parseInt(month)}/${parseInt(day)}`;
+      const monthStr = String(parseInt(month)).padStart(2, '0');
+      const dayStr = String(parseInt(day)).padStart(2, '0');
+      const formattedDate = `${year}/${monthStr}/${dayStr}`;
 
       const submitBtn = document.getElementById('manualSubmitBtn');
       submitBtn.disabled = true;
