@@ -912,11 +912,19 @@
       <div class="bg-white rounded-2xl shadow-xl p-8 no-print">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">出勤統計</h2>
         <div class="space-y-4 mb-6">
-          <div>
-            <label for="statsMonthSelect" class="block text-sm font-bold text-gray-700 mb-2">月を選択:</label>
-            <select id="statsMonthSelect" onchange="updateStats()" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
-              <option value="">--- 全期間 ---</option>
-            </select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="statsStartMonthSelect" class="block text-sm font-bold text-gray-700 mb-2">開始月:</label>
+              <select id="statsStartMonthSelect" onchange="updateStats()" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+                <option value="">--- 最初の月から ---</option>
+              </select>
+            </div>
+            <div>
+              <label for="statsEndMonthSelect" class="block text-sm font-bold text-gray-700 mb-2">終了月:</label>
+              <select id="statsEndMonthSelect" onchange="updateStats()" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+                <option value="">--- 最後の月まで ---</option>
+              </select>
+            </div>
           </div>
           <button onclick="window.print()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-4 rounded-xl font-bold text-lg hover:from-blue-700 hover:to-cyan-700 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
             印刷
@@ -985,6 +993,23 @@
           <p class="text-gray-600 bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
             以下の操作は取り消せません。十分注意して実行してください。
           </p>
+        </div>
+
+        <div class="bg-yellow-50 p-6 rounded-xl border-l-4 border-yellow-500 mb-6 shadow-md">
+          <h4 class="text-lg font-bold text-yellow-800 mb-3">月を選択して出勤記録を削除</h4>
+          <p class="text-yellow-800 mb-4">
+            指定した月の出勤記録のみ削除します。<br>
+            <strong>※ 人員情報は削除されません</strong>
+          </p>
+          <div class="mb-4">
+            <label for="deleteMonthSelect" class="block text-sm font-bold text-gray-700 mb-2">削除対象の月:</label>
+            <select id="deleteMonthSelect" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
+              <option value="">--- 選択してください ---</option>
+            </select>
+          </div>
+          <button onclick="deleteRecordsByMonth()" class="px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition duration-200 shadow-lg hover:shadow-xl">
+            選択月の出勤記録を削除
+          </button>
         </div>
 
         <div class="bg-yellow-50 p-6 rounded-xl border-l-4 border-yellow-500 mb-6 shadow-md">
@@ -1186,7 +1211,7 @@
           // 検索タブは特に処理なし
           break;
         case 'settings':
-          // 設定タブは特に処理なし
+          populateDeleteMonthSelect();
           break;
       }
     }
@@ -1497,11 +1522,16 @@
       document.getElementById('todayStats').innerHTML = html;
     }
 
-    // 統計月選択リストを生成
-    function populateStatsMonthSelect() {
-      const monthSelect = document.getElementById('statsMonthSelect');
+    function monthKeyToNumber(monthKey) {
+      if (!monthKey) return null;
+      const [year, month] = monthKey.split('/').map(Number);
+      if (!year || !month) return null;
+      return year * 12 + month;
+    }
+
+    function getAvailableMonthKeys() {
       const months = new Set();
-      
+
       records.forEach(r => {
         if (r.date) {
           const parts = r.date.split('/');
@@ -1512,33 +1542,73 @@
         }
       });
 
-      const sortedMonths = Array.from(months).sort((a, b) => {
-        const [yearA, monthA] = a.split('/').map(Number);
-        const [yearB, monthB] = b.split('/').map(Number);
-        return yearB * 12 + monthB - (yearA * 12 + monthA);
-      });
+      return Array.from(months).sort((a, b) => monthKeyToNumber(b) - monthKeyToNumber(a));
+    }
 
-      monthSelect.innerHTML = '<option value="">--- 全期間 ---</option>' +
+    // 統計月選択リストを生成
+    function populateStatsMonthSelect() {
+      const startMonthSelect = document.getElementById('statsStartMonthSelect');
+      const endMonthSelect = document.getElementById('statsEndMonthSelect');
+      const sortedMonths = getAvailableMonthKeys();
+
+      const previousStartValue = startMonthSelect.value;
+      const previousEndValue = endMonthSelect.value;
+
+      const options = sortedMonths.map(m => `<option value="${m}">${m}</option>`).join('');
+      startMonthSelect.innerHTML = '<option value="">--- 最初の月から ---</option>' + options;
+      endMonthSelect.innerHTML = '<option value="">--- 最後の月まで ---</option>' + options;
+
+      if (previousStartValue && sortedMonths.includes(previousStartValue)) {
+        startMonthSelect.value = previousStartValue;
+      }
+      if (previousEndValue && sortedMonths.includes(previousEndValue)) {
+        endMonthSelect.value = previousEndValue;
+      }
+    }
+
+    // 削除対象の月選択リストを生成
+    function populateDeleteMonthSelect() {
+      const deleteMonthSelect = document.getElementById('deleteMonthSelect');
+      const sortedMonths = getAvailableMonthKeys();
+      const previousValue = deleteMonthSelect.value;
+
+      deleteMonthSelect.innerHTML = '<option value="">--- 選択してください ---</option>' +
         sortedMonths.map(m => `<option value="${m}">${m}</option>`).join('');
+
+      if (previousValue && sortedMonths.includes(previousValue)) {
+        deleteMonthSelect.value = previousValue;
+      }
     }
 
     // 統計表示
     function updateStats() {
-      const monthValue = document.getElementById('statsMonthSelect').value;
+      const startMonthValue = document.getElementById('statsStartMonthSelect').value;
+      const endMonthValue = document.getElementById('statsEndMonthSelect').value;
+
+      let startMonthNumber = monthKeyToNumber(startMonthValue);
+      let endMonthNumber = monthKeyToNumber(endMonthValue);
+
+      if (startMonthNumber && endMonthNumber && startMonthNumber > endMonthNumber) {
+        [startMonthNumber, endMonthNumber] = [endMonthNumber, startMonthNumber];
+      }
+
       let filteredRecords = records;
       let title = '出勤統計';
-      
-      // 月でフィルタリング
-      if (monthValue) {
-        const [year, month] = monthValue.split('/').map(Number);
+
+      if (startMonthNumber || endMonthNumber) {
         filteredRecords = records.filter(r => {
           if (!r.date) return false;
           const parts = r.date.split('/');
-          return parts.length === 3 && 
-                 parseInt(parts[0]) === year && 
-                 parseInt(parts[1]) === month;
+          if (parts.length !== 3) return false;
+          const recordMonthNumber = Number(parts[0]) * 12 + Number(parts[1]);
+          if (startMonthNumber && recordMonthNumber < startMonthNumber) return false;
+          if (endMonthNumber && recordMonthNumber > endMonthNumber) return false;
+          return true;
         });
-        title = `出勤統計 ${year}年${month}月`;
+
+        const startLabel = startMonthValue || '最初';
+        const endLabel = endMonthValue || '最後';
+        title = `出勤統計 ${startLabel}〜${endLabel}`;
       }
 
       const stats = people.map(p => {
@@ -1906,9 +1976,75 @@
         
         alert(`${recordsSnapshot.size}件の出勤記録を削除しました`);
         updateTodayStats();
+        updatePersonList();
         updateStats();
+        populateMonthSelect();
+        populateStatsMonthSelect();
+        populateDeleteMonthSelect();
       } catch (error) {
         console.error('削除エラー:', error);
+        alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // 選択した月の出勤記録を削除
+    async function deleteRecordsByMonth() {
+      const monthValue = document.getElementById('deleteMonthSelect').value;
+      if (!monthValue) {
+        alert('削除する月を選択してください');
+        return;
+      }
+
+      const targetRecords = records.filter(r => {
+        if (!r.date) return false;
+        const parts = r.date.split('/');
+        return parts.length === 3 && `${parts[0]}/${parts[1]}` === monthValue;
+      });
+
+      if (targetRecords.length === 0) {
+        alert(`${monthValue} の出勤記録はありません`);
+        return;
+      }
+
+      const confirmation = prompt(
+        `${monthValue} の出勤記録 ${targetRecords.length}件 を削除します。\n※ この操作は取り消せません\n\n削除する場合は「削除する」と入力してください:`
+      );
+      if (confirmation !== '削除する') {
+        alert('キャンセルしました');
+        return;
+      }
+
+      const secondConfirmation = confirm(`${monthValue} の出勤記録を削除します。\n本当に実行しますか？`);
+      if (!secondConfirmation) {
+        alert('キャンセルしました');
+        return;
+      }
+
+      try {
+        const batch = db.batch();
+        targetRecords.forEach(record => {
+          if (record.id) {
+            batch.delete(db.collection('records').doc(record.id));
+          }
+        });
+        await batch.commit();
+
+        records = records.filter(r => {
+          if (!r.date) return true;
+          const parts = r.date.split('/');
+          if (parts.length !== 3) return true;
+          return `${parts[0]}/${parts[1]}` !== monthValue;
+        });
+
+        alert(`${monthValue} の出勤記録を ${targetRecords.length}件 削除しました`);
+        updateTodayStats();
+        updateStats();
+        updatePersonList();
+        populateMonthSelect();
+        populateStatsMonthSelect();
+        populateDeleteMonthSelect();
+      } catch (error) {
+        console.error('月別削除エラー:', error);
         alert('削除に失敗しました: ' + error.message);
       }
     }
@@ -1960,6 +2096,9 @@
         updateTodayStats();
         updateStats();
         updateManualForm();
+        populateMonthSelect();
+        populateStatsMonthSelect();
+        populateDeleteMonthSelect();
       } catch (error) {
         console.error('削除エラー:', error);
         alert('削除に失敗しました: ' + error.message);
@@ -2064,7 +2203,11 @@
         
         // 他の表示も更新
         updateTodayStats();
+        updatePersonList();
         updateStats();
+        populateMonthSelect();
+        populateStatsMonthSelect();
+        populateDeleteMonthSelect();
         
         alert('記録を削除しました');
       } catch (error) {
