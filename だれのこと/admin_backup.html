@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理画面 - 出勤管理システム</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "メイリオ", sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .top-bar {
+      max-width: 1400px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 15px 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .top-bar h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    .top-bar a {
+      padding: 10px 20px;
+      background-color: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .top-bar a:hover {
+      background-color: #5568d3;
+    }
+    .header {
+      max-width: 1400px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .tab-button {
+      padding: 12px 30px;
+      font-size: 16px;
+      background-color: #ddd;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .tab-button.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: none;
+    }
+    .container.active {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .container.active.full {
+      grid-template-columns: 1fr;
+    }
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    h3 {
+      font-size: 18px;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    label {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], input[type="date"], input[type="time"], select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button.danger {
+      background-color: #f44336;
+    }
+    button.danger:hover {
+      background-color: #da190b;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+    .person-item {
+      background-color: #f9f9f9;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border-left: 4px solid #4CAF50;
+    }
+    .person-item strong {
+      font-size: 18px;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .person-info {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    .person-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .person-stat {
+      background-color: white;
+      padding: 8px;
+      border-radius: 3px;
+      text-align: center;
+    }
+    .person-stat-value {
+      font-weight: bold;
+      color: #4CAF50;
+      font-size: 18px;
+    }
+
+    /* 印刷用スタイル */
+    @media print {
+      @page {
+        size: A4;
+        margin: 10mm 12mm;
+      }
+      body {
+        background-color: white;
+        padding: 0;
+        margin: 0;
+        font-size: 10pt;
+      }
+      .top-bar, .header, .no-print {
+        display: none !important;
+      }
+      .container {
+        display: block !important;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+      }
+      .container:not(#monthly) {
+        display: none !important;
+      }
+      .section {
+        box-shadow: none;
+        padding: 0;
+        margin: 0;
+      }
+      #monthlyReportContent {
+        margin: 0;
+        padding: 0;
+      }
+      .print-page {
+        page-break-after: always;
+        page-break-inside: avoid;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        max-width: 100%;
+        width: 100%;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .print-page:last-child {
+        page-break-after: auto;
+      }
+      /* レポートヘッダー */
+      .report-header {
+        margin-bottom: 3mm;
+        border-bottom: 2px solid #333;
+        padding-bottom: 2mm;
+      }
+      .report-header h2 {
+        font-size: 16pt;
+        margin: 0;
+        font-weight: bold;
+      }
+      .report-header .month {
+        font-size: 13pt;
+        margin-top: 1mm;
+      }
+      /* 従業員情報 */
+      .employee-info {
+        margin-bottom: 3mm;
+        padding: 2mm;
+        background-color: #f5f5f5;
+      }
+      .employee-info table {
+        font-size: 9pt;
+        width: 100%;
+      }
+      .employee-info td {
+        padding: 1mm 2mm;
+      }
+      .employee-info td:first-child {
+        width: 100px;
+        font-weight: bold;
+      }
+      /* カレンダー */
+      .calendar-container {
+        margin-top: 2mm;
+      }
+      .calendar-title {
+        font-size: 11pt;
+        margin-bottom: 1mm;
+        font-weight: bold;
+      }
+      .calendar {
+        font-size: 8pt;
+        margin-bottom: 2mm;
+        width: 100%;
+      }
+      .calendar th {
+        padding: 1mm;
+        font-size: 8pt;
+      }
+      .calendar td {
+        padding: 0.5mm;
+        height: 20px;
+        vertical-align: middle;
+      }
+      .calendar .day-number {
+        font-size: 9pt;
+      }
+      .calendar .attendance-mark {
+        font-size: 20px;
+        line-height: 1;
+      }
+      /* 集計セクション */
+      .summary-section {
+        page-break-inside: avoid;
+        margin-top: 2mm;
+        padding: 2mm;
+      }
+      .summary-section h3 {
+        font-size: 12pt;
+        margin: 0 0 2mm 0;
+        font-weight: bold;
+      }
+      .summary-grid {
+        gap: 2mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+      .summary-item {
+        padding: 2mm;
+      }
+      .summary-label {
+        font-size: 9pt;
+        margin-bottom: 1mm;
+      }
+      .summary-value {
+        font-size: 16pt;
+        font-weight: bold;
+      }
+    }
+
+    /* 月次レポート用スタイル（画面表示用） */
+    .print-page {
+      background: white;
+      margin: 20px auto;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      max-width: 210mm;
+    }
+    .report-header {
+      text-align: center;
+      margin-bottom: 20px;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .report-header h2 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      border: none;
+    }
+    .report-header .month {
+      font-size: 20px;
+      color: #666;
+    }
+    .employee-info {
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 5px;
+    }
+    .employee-info table {
+      width: 100%;
+      border: none;
+    }
+    .employee-info td {
+      padding: 8px;
+      border: none;
+    }
+    .employee-info td:first-child {
+      font-weight: bold;
+      width: 150px;
+      background-color: #e8e8e8;
+    }
+    .calendar-container {
+      margin-top: 20px;
+    }
+    .calendar-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .calendar {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .calendar th {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px;
+      font-size: 14px;
+    }
+    .calendar td {
+      width: 14.28%;
+      height: 60px;
+      border: 1px solid #ddd;
+      text-align: center;
+      vertical-align: top;
+      padding: 5px;
+      position: relative;
+    }
+    .calendar .day-number {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .calendar .attendance-mark {
+      font-size: 48px;
+      color: #4CAF50;
+      font-weight: bold;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      line-height: 1;
+    }
+    .calendar .sunday {
+      background-color: #ffe0e0;
+    }
+    .calendar .saturday {
+      background-color: #e0e8ff;
+    }
+    .calendar .other-month {
+      background-color: #f5f5f5;
+      color: #ccc;
+    }
+    .summary-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f0f8f0;
+      border-radius: 5px;
+      border: 2px solid #4CAF50;
+    }
+    .summary-section h3 {
+      margin-top: 0;
+      border: none;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-top: 10px;
+    }
+    .summary-item {
+      padding: 10px;
+      background-color: white;
+      border-radius: 3px;
+    }
+    .summary-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .summary-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>管理画面</h1>
+    <a href="attendance.html">出勤記録へ</a>
+  </div>
+
+  <div class="header">
+    <button class="tab-button active" onclick="switchTab('today')">本日の出勤</button>
+    <button class="tab-button" onclick="switchTab('manual')">手動記録</button>
+    <button class="tab-button" onclick="switchTab('management')">人員管理</button>
+    <button class="tab-button" onclick="switchTab('stats')">統計</button>
+    <button class="tab-button" onclick="switchTab('monthly')">月次レポート</button>
+    <button class="tab-button" onclick="switchTab('settings')">設定</button>
+  </div>
+
+  <!-- 本日の出勤タブ -->
+  <div id="today" class="container active full">
+    <div class="section">
+      <h2>本日の出勤状況</h2>
+      <div id="todayStats"></div>
+    </div>
+  </div>
+
+  <!-- 手動記録タブ -->
+  <div id="manual" class="container active full">
+    <div class="section">
+      <h2>手動で出勤記録を追加</h2>
+      <p style="color: #666; margin-bottom: 20px;">※ 管理者用：場所・回数制限なしで記録を追加できます</p>
+      
+      <form id="manualRecordForm">
+        <label for="manualPersonSelect">氏名:</label>
+        <select id="manualPersonSelect" required>
+          <option value="">--- 選択してください ---</option>
+        </select>
+
+        <label for="manualDate">日付:</label>
+        <input type="date" id="manualDate" required>
+
+        <label for="manualTime">時刻:</label>
+        <input type="time" id="manualTime" required>
+
+        <label>交通経路:</label>
+        <div style="margin-bottom: 15px;">
+          <label style="display: inline-flex; align-items: center; margin-right: 20px;">
+            <input type="radio" name="manualRoute" value="家→事務所" required style="margin-right: 8px;">
+            家→事務所
+          </label>
+          <label style="display: inline-flex; align-items: center;">
+            <input type="radio" name="manualRoute" value="学校→事務所" style="margin-right: 8px;">
+            学校→事務所
+          </label>
+        </div>
+
+        <button type="submit" id="manualSubmitBtn">記録を追加</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 人員管理タブ -->
+  <div id="management" class="container active full">
+    <div class="section">
+      <h2>人員管理</h2>
+      
+      <h3>新しい人を追加</h3>
+      <form id="personForm">
+        <label for="personName">氏名:</label>
+        <input type="text" id="personName" required>
+
+        <label for="homeStation">最寄り駅（家）:</label>
+        <input type="text" id="homeStation" required>
+
+        <label for="homeFare">往復交通費（家→事務所） (円):</label>
+        <input type="number" id="homeFare" min="0" required>
+
+        <label for="universityStation">大学最寄り駅:</label>
+        <input type="text" id="universityStation" required>
+
+        <label for="universityFare">往復交通費（学校→事務所） (円):</label>
+        <input type="number" id="universityFare" min="0" required>
+
+        <button type="submit" id="addPersonBtn">登録</button>
+      </form>
+
+      <h3>登録済みの人</h3>
+      <div id="personList"></div>
+    </div>
+  </div>
+
+  <!-- 統計タブ -->
+  <div id="stats" class="container active full">
+    <div class="section">
+      <h2>出勤統計</h2>
+      <div id="statsContent"></div>
+    </div>
+  </div>
+
+  <!-- 月次レポートタブ -->
+  <div id="monthly" class="container active full">
+    <div class="section no-print">
+      <h2>月次レポート</h2>
+      <label for="monthSelect">月を選択:</label>
+      <select id="monthSelect" onchange="updateMonthlyReport()">
+        <option value="">--- 選択してください ---</option>
+      </select>
+      <button onclick="window.print()" style="margin-top: 20px;">印刷</button>
+    </div>
+
+    <div id="monthlyReportContent"></div>
+  </div>
+
+  <!-- 設定タブ -->
+  <div id="settings" class="container active full">
+    <div class="section">
+      <h2>設定</h2>
+      
+      <h3 style="color: #f44336; border-bottom: 2px solid #f44336;">危険な操作</h3>
+      <p style="color: #666; margin-bottom: 20px;">
+        以下の操作は取り消せません。十分注意して実行してください。
+      </p>
+
+      <div style="background-color: #fff3cd; padding: 20px; border-radius: 5px; border-left: 4px solid #ff9800; margin-bottom: 20px;">
+        <h4 style="margin-top: 0; color: #856404;">出勤記録を全て削除</h4>
+        <p style="color: #856404; margin-bottom: 15px;">
+          年度末などに、全ての出勤記録を削除します。<br>
+          <strong>※ 人員情報は削除されません（出勤記録のみ削除されます）</strong>
+        </p>
+        <button class="danger" onclick="deleteAllRecords()">全ての出勤記録を削除</button>
+      </div>
+
+      <div style="background-color: #f8d7da; padding: 20px; border-radius: 5px; border-left: 4px solid #f44336;">
+        <h4 style="margin-top: 0; color: #721c24;">全データを削除</h4>
+        <p style="color: #721c24; margin-bottom: 15px;">
+          全ての人員情報と出勤記録を削除します。<br>
+          <strong>※ システムを完全にリセットします</strong>
+        </p>
+        <button class="danger" onclick="deleteAllData()">全データを削除（完全リセット）</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCSI2kDqV7eMPqwBh0nNDORdGtw5aydQ",
+      authDomain: "kdaikda.firebaseapp.com",
+      projectId: "kdaikda",
+      storageBucket: "kdaikda.firebasestorage.app",
+      messagingSenderId: "640889239505",
+      appId: "1:640889239505:web:993aa3aba77560837f12f0"
+    };
+
+    // Firebase初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let people = [];
+    let records = [];
+
+    // 統一された日付フォーマット関数
+    function getDateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}/${m}/${d}`;
+    }
+
+    // 統一された時刻フォーマット関数
+    function getTimeString(date) {
+      const h = String(date.getHours()).padStart(2, '0');
+      const m = String(date.getMinutes()).padStart(2, '0');
+      const s = String(date.getSeconds()).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    // データ読み込み
+    async function loadData() {
+      try {
+        // 人員データ読み込み
+        const peopleSnapshot = await db.collection('people').get();
+        people = peopleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // 出勤記録読み込み
+        const recordsSnapshot = await db.collection('records').orderBy('timestamp', 'desc').get();
+        records = recordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        updatePersonList();
+        updateTodayStats();
+      } catch (error) {
+        console.error('データ読み込みエラー:', error);
+        alert('データの読み込みに失敗しました');
+      }
+    }
+
+    // タブ切り替え
+    function switchTab(tabName) {
+      document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabName).classList.add('active');
+      event.target.classList.add('active');
+
+      // タブ固有の処理を一元管理
+      switch(tabName) {
+        case 'stats':
+          updateStats();
+          break;
+        case 'management':
+          updatePersonList();
+          break;
+        case 'today':
+          updateTodayStats();
+          break;
+        case 'monthly':
+          populateMonthSelect();
+          break;
+        case 'manual':
+          updateManualForm();
+          break;
+        case 'settings':
+          // 設定タブは特に処理なし
+          break;
+      }
+    }
+
+    // 手動記録フォーム更新
+    function updateManualForm() {
+      const select = document.getElementById('manualPersonSelect');
+      const options = '<option value="">--- 選択してください ---</option>' + 
+        people.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      select.innerHTML = options;
+
+      // 今日の日付と現在時刻をデフォルト設定
+      const now = new Date();
+      document.getElementById('manualDate').valueAsDate = now;
+      document.getElementById('manualTime').value = now.toTimeString().substring(0, 5);
+    }
+
+    // 人を追加
+    document.getElementById('personForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('personName').value;
+      const homeStation = document.getElementById('homeStation').value;
+      const homeFare = parseInt(document.getElementById('homeFare').value);
+      const universityStation = document.getElementById('universityStation').value;
+      const universityFare = parseInt(document.getElementById('universityFare').value);
+
+      if (people.some(p => p.name === name)) {
+        alert('この名前は既に登録されています');
+        return;
+      }
+
+      const submitBtn = document.getElementById('addPersonBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '登録中...';
+
+      try {
+        const personData = {
+          name: name,
+          homeStation: homeStation,
+          homeFare: homeFare,
+          universityStation: universityStation,
+          universityFare: universityFare,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        const docRef = await db.collection('people').add(personData);
+        const person = { id: docRef.id, ...personData };
+        people.push(person);
+
+        this.reset();
+        updatePersonList();
+        alert('人を登録しました');
+      } catch (error) {
+        console.error('登録エラー:', error);
+        alert('登録に失敗しました');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '登録';
+      }
+    });
+
+    // 人を編集
+    async function editPerson(id) {
+      const person = people.find(p => p.id === id);
+      if (!person) return;
+
+      // 現在の値を表示して編集
+      const name = prompt('氏名:', person.name);
+      if (name === null) return; // キャンセル
+      if (!name.trim()) {
+        alert('氏名を入力してください');
+        return;
+      }
+
+      const homeStation = prompt('最寄り駅（家）:', person.homeStation);
+      if (homeStation === null) return;
+      if (!homeStation.trim()) {
+        alert('最寄り駅を入力してください');
+        return;
+      }
+
+      const homeFareStr = prompt('往復交通費（家→事務所）円:', person.homeFare);
+      if (homeFareStr === null) return;
+      const homeFare = parseInt(homeFareStr);
+      if (isNaN(homeFare) || homeFare < 0) {
+        alert('正しい金額を入力してください');
+        return;
+      }
+
+      const universityStation = prompt('大学最寄り駅:', person.universityStation);
+      if (universityStation === null) return;
+      if (!universityStation.trim()) {
+        alert('大学最寄り駅を入力してください');
+        return;
+      }
+
+      const universityFareStr = prompt('往復交通費（学校→事務所）円:', person.universityFare);
+      if (universityFareStr === null) return;
+      const universityFare = parseInt(universityFareStr);
+      if (isNaN(universityFare) || universityFare < 0) {
+        alert('正しい金額を入力してください');
+        return;
+      }
+
+      try {
+        const updateData = {
+          name: name.trim(),
+          homeStation: homeStation.trim(),
+          homeFare: homeFare,
+          universityStation: universityStation.trim(),
+          universityFare: universityFare
+        };
+
+        await db.collection('people').doc(id).update(updateData);
+
+        // ローカルデータも更新
+        const index = people.findIndex(p => p.id === id);
+        if (index !== -1) {
+          people[index] = { ...people[index], ...updateData };
+        }
+
+        updatePersonList();
+        updateManualForm();
+        alert('更新しました');
+      } catch (error) {
+        console.error('更新エラー:', error);
+        alert('更新に失敗しました');
+      }
+    }
+
+    // 人を削除
+    async function deletePerson(id) {
+      const person = people.find(p => p.id === id);
+      if (!person) return;
+
+      const relatedRecords = records.filter(r => r.personId === id);
+      const recordCount = relatedRecords.length;
+
+      let confirmMessage = `「${person.name}」を削除しますか？\n\n`;
+      if (recordCount > 0) {
+        confirmMessage += `⚠️ この人に関連する出勤記録が${recordCount}件あります。\n`;
+        confirmMessage += `人員情報と一緒に全ての出勤記録も削除されます。\n\n`;
+      }
+      confirmMessage += '本当に削除しますか？';
+
+      if (!confirm(confirmMessage)) return;
+
+      try {
+        // 関連する出勤記録も削除
+        if (recordCount > 0) {
+          const batch = db.batch();
+          
+          // 人員を削除
+          batch.delete(db.collection('people').doc(id));
+          
+          // 関連する出勤記録を削除
+          relatedRecords.forEach(record => {
+            if (record.id) {
+              batch.delete(db.collection('records').doc(record.id));
+            }
+          });
+
+          await batch.commit();
+        } else {
+          // 出勤記録がない場合は人員のみ削除
+          await db.collection('people').doc(id).delete();
+        }
+
+        // ローカルデータも更新
+        people = people.filter(p => p.id !== id);
+        records = records.filter(r => r.personId !== id);
+
+        updatePersonList();
+        updateStats();
+        updateTodayStats();
+        alert(`削除しました（人員1件、出勤記録${recordCount}件）`);
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // 人員リスト更新
+    function updatePersonList() {
+      const html = people.map(p => {
+        const count = records.filter(r => r.personId === p.id).length;
+        const homeCount = records.filter(r => r.personId === p.id && r.route === '家→事務所').length;
+        const schoolCount = records.filter(r => r.personId === p.id && r.route === '学校→事務所').length;
+        const totalFare = p.homeFare * homeCount + p.universityFare * schoolCount;
+        
+        return `
+          <div class="person-item">
+            <strong>${p.name}</strong>
+            <div class="person-info">
+              家最寄り駅: ${p.homeStation} (¥${p.homeFare.toLocaleString()}) | 
+              大学最寄り駅: ${p.universityStation} (¥${p.universityFare.toLocaleString()})
+            </div>
+            <div class="person-stats">
+              <div class="person-stat">
+                <div>出勤回数</div>
+                <div class="person-stat-value">${count}</div>
+              </div>
+              <div class="person-stat">
+                <div>交通費合計</div>
+                <div class="person-stat-value">¥${totalFare.toLocaleString()}</div>
+              </div>
+              <div class="person-stat" style="display: flex; gap: 5px;">
+                <button class="secondary" style="padding: 5px 10px; font-size: 14px; margin: 0; flex: 1;" onclick="editPerson('${p.id}')">編集</button>
+                <button class="danger" style="padding: 5px 10px; font-size: 14px; margin: 0; flex: 1;" onclick="deletePerson('${p.id}')">削除</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('personList').innerHTML = html || '<p>登録者がいません</p>';
+    }
+
+    // 本日の出勤状況
+    function updateTodayStats() {
+      const today = getDateString(new Date());
+      const todayRecords = records.filter(r => r.date === today);
+
+      const html = todayRecords.length === 0 ? '<p>本日の記録はありません</p>' : `
+        <table>
+          <thead>
+            <tr>
+              <th>氏名</th>
+              <th>時刻</th>
+              <th>経路</th>
+              <th>距離</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${todayRecords.map(r => `
+              <tr>
+                <td>${r.personName}</td>
+                <td>${r.time}</td>
+                <td>${r.route}</td>
+                <td>${Math.round(r.distance)}m</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('todayStats').innerHTML = html;
+    }
+
+    // 統計表示
+    function updateStats() {
+      const stats = people.map(p => {
+        const pRecords = records.filter(r => r.personId === p.id);
+        const homeCount = pRecords.filter(r => r.route === '家→事務所').length;
+        const schoolCount = pRecords.filter(r => r.route === '学校→事務所').length;
+        const totalFare = p.homeFare * homeCount + p.universityFare * schoolCount;
+
+        return { name: p.name, homeCount, schoolCount, totalFare, total: pRecords.length };
+      });
+
+      const html = `
+        <table>
+          <thead>
+            <tr>
+              <th>氏名</th>
+              <th>家→事務所</th>
+              <th>学校→事務所</th>
+              <th>合計出勤</th>
+              <th>交通費合計</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${stats.map(s => `
+              <tr>
+                <td>${s.name}</td>
+                <td>${s.homeCount}</td>
+                <td>${s.schoolCount}</td>
+                <td>${s.total}</td>
+                <td>¥${s.totalFare.toLocaleString()}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById('statsContent').innerHTML = html || '<p>データがありません</p>';
+    }
+
+    // 月選択リストを生成
+    function populateMonthSelect() {
+      const monthSelect = document.getElementById('monthSelect');
+      const months = new Set();
+      
+      records.forEach(r => {
+        if (r.date) {
+          const parts = r.date.split('/');
+          if (parts.length === 3) {
+            const monthKey = `${parts[0]}/${parts[1]}`;
+            months.add(monthKey);
+          }
+        }
+      });
+
+      const sortedMonths = Array.from(months).sort((a, b) => {
+        const [yearA, monthA] = a.split('/').map(Number);
+        const [yearB, monthB] = b.split('/').map(Number);
+        return yearB * 12 + monthB - (yearA * 12 + monthA);
+      });
+
+      monthSelect.innerHTML = '<option value="">--- 選択してください ---</option>' +
+        sortedMonths.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    // カレンダー生成
+    function generateCalendar(year, month, attendanceDates) {
+      const firstDay = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0);
+      const daysInMonth = lastDay.getDate();
+      const startDay = firstDay.getDay();
+
+      let html = '<table class="calendar"><thead><tr>';
+      ['日', '月', '火', '水', '木', '金', '土'].forEach(day => {
+        html += `<th>${day}</th>`;
+      });
+      html += '</tr></thead><tbody><tr>';
+
+      // 前月の空白
+      for (let i = 0; i < startDay; i++) {
+        html += '<td class="other-month"></td>';
+      }
+
+      // 日付を表示
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month - 1, day);
+        const dayOfWeek = date.getDay();
+        const dateStr = `${year}/${month}/${day}`;
+        const hasAttendance = attendanceDates.includes(dateStr);
+
+        let className = '';
+        if (dayOfWeek === 0) className = 'sunday';
+        else if (dayOfWeek === 6) className = 'saturday';
+
+        html += `<td class="${className}">
+          <div class="day-number">${day}</div>
+          ${hasAttendance ? '<div class="attendance-mark">×</div>' : ''}
+        </td>`;
+
+        if (dayOfWeek === 6 && day < daysInMonth) {
+          html += '</tr><tr>';
+        }
+      }
+
+      // 次月の空白
+      const endDay = lastDay.getDay();
+      for (let i = endDay + 1; i < 7; i++) {
+        html += '<td class="other-month"></td>';
+      }
+
+      html += '</tr></tbody></table>';
+      return html;
+    }
+
+    // 月次レポート更新
+    function updateMonthlyReport() {
+      const monthValue = document.getElementById('monthSelect').value;
+      if (!monthValue) {
+        document.getElementById('monthlyReportContent').innerHTML = '';
+        return;
+      }
+
+      const [year, month] = monthValue.split('/').map(Number);
+      
+      // その月のレコードをフィルタ
+      const monthRecords = records.filter(r => {
+        if (!r.date) return false;
+        const parts = r.date.split('/');
+        return parts.length === 3 && 
+               parseInt(parts[0]) === year && 
+               parseInt(parts[1]) === month;
+      });
+
+      // 人ごとにレポート作成
+      const reportsHtml = people.map(person => {
+        const personRecords = monthRecords.filter(r => r.personId === person.id);
+        const homeCount = personRecords.filter(r => r.route === '家→事務所').length;
+        const schoolCount = personRecords.filter(r => r.route === '学校→事務所').length;
+        const totalFare = person.homeFare * homeCount + person.universityFare * schoolCount;
+        
+        // 出勤日のリスト
+        const attendanceDates = personRecords.map(r => r.date);
+
+        return `
+          <div class="print-page">
+            <div class="report-header">
+              <h2>出勤管理月次レポート</h2>
+              <div class="month">${year}年${month}月</div>
+            </div>
+
+            <div class="employee-info">
+              <table>
+                <tr>
+                  <td>氏名</td>
+                  <td>${person.name}</td>
+                </tr>
+                <tr>
+                  <td>家 最寄り駅</td>
+                  <td>${person.homeStation}</td>
+                </tr>
+                <tr>
+                  <td>家 往復交通費</td>
+                  <td>¥${person.homeFare.toLocaleString()}</td>
+                </tr>
+                <tr>
+                  <td>大学 最寄り駅</td>
+                  <td>${person.universityStation}</td>
+                </tr>
+                <tr>
+                  <td>大学 往復交通費</td>
+                  <td>¥${person.universityFare.toLocaleString()}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div class="calendar-container">
+              <div class="calendar-title">出勤カレンダー（×印が出勤日）</div>
+              ${generateCalendar(year, month, attendanceDates)}
+            </div>
+
+            <div class="summary-section">
+              <h3>今月の集計</h3>
+              <div class="summary-grid">
+                <div class="summary-item">
+                  <div class="summary-label">家→事務所</div>
+                  <div class="summary-value">${homeCount}回</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">学校→事務所</div>
+                  <div class="summary-value">${schoolCount}回</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">合計出勤日数</div>
+                  <div class="summary-value">${personRecords.length}日</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-label">交通費合計</div>
+                  <div class="summary-value">¥${totalFare.toLocaleString()}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('monthlyReportContent').innerHTML = reportsHtml || '<p>データがありません</p>';
+    }
+
+    // 手動記録の追加
+    document.getElementById('manualRecordForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const personId = document.getElementById('manualPersonSelect').value;
+      const person = people.find(p => p.id === personId);
+      const dateInput = document.getElementById('manualDate').value;
+      const timeInput = document.getElementById('manualTime').value;
+      const route = document.querySelector('input[name="manualRoute"]:checked').value;
+
+      // 日付フォーマット変換 (YYYY-MM-DD → YYYY/MM/DD)
+      const [year, month, day] = dateInput.split('-');
+      const formattedDate = `${year}/${parseInt(month)}/${parseInt(day)}`;
+
+      const submitBtn = document.getElementById('manualSubmitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '記録中...';
+
+      try {
+        const recordData = {
+          personId: person.id,
+          personName: person.name,
+          route: route,
+          date: formattedDate,
+          time: timeInput + ':00',
+          lat: 0,  // 手動記録は位置情報なし
+          lng: 0,
+          distance: 0,
+          manual: true,  // 手動記録フラグ
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        await db.collection('records').add(recordData);
+        records.unshift({ id: Date.now(), ...recordData });
+
+        this.reset();
+        updateManualForm();  // フォームをリセット
+        alert('記録を追加しました');
+      } catch (error) {
+        console.error('記録エラー:', error);
+        alert('記録の追加に失敗しました: ' + error.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '記録を追加';
+      }
+    });
+
+    // 出勤記録を全て削除
+    async function deleteAllRecords() {
+      const confirmation = prompt('本当に全ての出勤記録を削除しますか？\n※ この操作は取り消せません\n\n削除する場合は「削除する」と入力してください:');
+      
+      if (confirmation !== '削除する') {
+        alert('キャンセルしました');
+        return;
+      }
+
+      const secondConfirmation = confirm('最終確認：全ての出勤記録を削除します。\n人員情報は残ります。\n\n本当に実行しますか？');
+      
+      if (!secondConfirmation) {
+        alert('キャンセルしました');
+        return;
+      }
+
+      try {
+        // Firestoreから全ての出勤記録を削除
+        const recordsSnapshot = await db.collection('records').get();
+        const batch = db.batch();
+        
+        recordsSnapshot.docs.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+
+        await batch.commit();
+        
+        // ローカルデータもクリア
+        records = [];
+        
+        alert(`${recordsSnapshot.size}件の出勤記録を削除しました`);
+        updateTodayStats();
+        updateStats();
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // 全データを削除（完全リセット）
+    async function deleteAllData() {
+      const confirmation = prompt('警告：全てのデータを削除します！\n・全ての人員情報\n・全ての出勤記録\n※ この操作は取り消せません\n\n削除する場合は「完全削除」と入力してください:');
+      
+      if (confirmation !== '完全削除') {
+        alert('キャンセルしました');
+        return;
+      }
+
+      const secondConfirmation = confirm('最終確認：システムを完全にリセットします。\n全てのデータが削除されます。\n\n本当に実行しますか？');
+      
+      if (!secondConfirmation) {
+        alert('キャンセルしました');
+        return;
+      }
+
+      try {
+        const batch = db.batch();
+        let deleteCount = 0;
+
+        // 全ての人員を削除
+        const peopleSnapshot = await db.collection('people').get();
+        peopleSnapshot.docs.forEach(doc => {
+          batch.delete(doc.ref);
+          deleteCount++;
+        });
+
+        // 全ての出勤記録を削除
+        const recordsSnapshot = await db.collection('records').get();
+        recordsSnapshot.docs.forEach(doc => {
+          batch.delete(doc.ref);
+          deleteCount++;
+        });
+
+        await batch.commit();
+        
+        // ローカルデータもクリア
+        people = [];
+        records = [];
+        
+        alert(`${deleteCount}件のデータを削除しました\nシステムがリセットされました`);
+        
+        // 全画面を更新
+        updatePersonList();
+        updateTodayStats();
+        updateStats();
+        updateManualForm();
+      } catch (error) {
+        console.error('削除エラー:', error);
+        alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // 初期化
+    loadData();
+  </script>
+</body>
+</html>
