@@ -9,6 +9,35 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // 出勤記録ページと統一した業務系ブランドカラー(落ち着いたインディゴ)。
+    // 既存マークアップの blue / cyan / teal クラスをまとめて上書きする。
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Segoe UI"', '"Hiragino Kaku Gothic ProN"', '"Noto Sans JP"', 'Meiryo', 'sans-serif'],
+          },
+          colors: {
+            brand: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            blue: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#6366f1',500:'#4f46e5',600:'#4338ca',700:'#3730a3',800:'#312e81',900:'#1e1b4b',950:'#131033' },
+            cyan: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            teal: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .container:not(.hidden) { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .tab-button { position: relative; }
+    .tab-button:active { transform: translateY(1px); }
+    button { transition: all 0.2s ease; }
+  </style>
   <style>
     /* Tailwindで管理するため不要
     * {
@@ -454,8 +483,8 @@
         margin-top: 2mm !important;
         margin-bottom: 0 !important;
         padding: 2mm 3mm !important;
-        background: linear-gradient(to right, #ecfeff, #f0f9ff) !important;
-        border: 2px solid #06b6d4 !important;
+        background: linear-gradient(to right, #eef2ff, #e0e7ff) !important;
+        border: 2px solid #6366f1 !important;
         border-radius: 2mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -465,7 +494,7 @@
         margin: 0 0 1.5mm 0 !important;
         font-weight: bold;
         border: none !important;
-        color: #0e7490 !important;
+        color: #4338ca !important;
       }
       .summary-list {
         display: flex !important;
@@ -480,7 +509,7 @@
         justify-content: space-between !important;
         padding: 2mm 3mm !important;
         margin: 0 !important;
-        border: 1px solid #06b6d4 !important;
+        border: 1px solid #6366f1 !important;
         background-color: white !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
@@ -502,8 +531,8 @@
         white-space: nowrap !important;
         margin: 0 !important;
         padding: 1mm 2mm !important;
-        color: #0e7490 !important;
-        background-color: rgba(6, 182, 212, 0.1) !important;
+        color: #4338ca !important;
+        background-color: rgba(99, 102, 241, 0.1) !important;
         border-radius: 1.5mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -527,8 +556,8 @@
         margin-top: 3mm !important;
         margin-bottom: 0 !important;
         padding: 2mm !important;
-        background: linear-gradient(to right, #ecfeff, #f0f9ff) !important;
-        border: 2px solid #06b6d4 !important;
+        background: linear-gradient(to right, #eef2ff, #e0e7ff) !important;
+        border: 2px solid #6366f1 !important;
         border-radius: 2mm;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
@@ -554,7 +583,7 @@
     .report-header {
       text-align: center;
       margin-bottom: 24px;
-      border-bottom: 3px solid #06b6d4;
+      border-bottom: 3px solid #6366f1;
       padding-bottom: 16px;
     }
     .report-header h2 {
@@ -566,15 +595,15 @@
     }
     .report-header .month {
       font-size: 20px;
-      color: #06b6d4;
+      color: #6366f1;
       font-weight: 600;
     }
     .employee-info {
       margin-bottom: 24px;
       padding: 16px;
-      background: linear-gradient(to right, #ecfeff, #f0f9ff);
+      background: linear-gradient(to right, #eef2ff, #e0e7ff);
       border-radius: 12px;
-      border: 2px solid #06b6d4;
+      border: 2px solid #6366f1;
     }
     .employee-info table {
       width: 100%;
@@ -587,9 +616,9 @@
     .employee-info td:first-child {
       font-weight: bold;
       width: 150px;
-      background-color: rgba(6, 182, 212, 0.1);
+      background-color: rgba(99, 102, 241, 0.1);
       border-radius: 8px;
-      color: #0e7490;
+      color: #4338ca;
     }
     .calendar-container {
       margin-top: 24px;
@@ -600,7 +629,7 @@
       margin-bottom: 12px;
       color: #1f2937;
       padding-bottom: 8px;
-      border-bottom: 2px solid #06b6d4;
+      border-bottom: 2px solid #6366f1;
     }
     .calendar {
       width: 100%;
@@ -611,7 +640,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .calendar th {
-      background: linear-gradient(to right, #0891b2, #06b6d4);
+      background: linear-gradient(to right, #4f46e5, #6366f1);
       color: white;
       padding: 12px;
       font-size: 14px;
@@ -629,7 +658,7 @@
       transition: background 0.2s;
     }
     .calendar td:hover {
-      background: #f0f9ff;
+      background: #e0e7ff;
     }
     .calendar .day-number {
       font-size: 16px;
@@ -638,7 +667,7 @@
     }
     .calendar .attendance-mark {
       font-size: 80px;
-      color: #06b6d4;
+      color: #6366f1;
       font-weight: bold;
       position: absolute;
       top: 50%;
@@ -659,9 +688,9 @@
     .summary-section {
       margin-top: 16px;
       padding: 12px;
-      background: linear-gradient(to right, #ecfeff, #f0f9ff);
+      background: linear-gradient(to right, #eef2ff, #e0e7ff);
       border-radius: 8px;
-      border: 2px solid #06b6d4;
+      border: 2px solid #6366f1;
     }
     .summary-section h3 {
       margin-top: 0;
@@ -669,7 +698,7 @@
       border: none;
       font-size: 16px;
       font-weight: bold;
-      color: #0e7490;
+      color: #4338ca;
     }
     .summary-list {
       display: flex;
@@ -687,13 +716,13 @@
       background-color: white;
       border-radius: 8px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      border: 1px solid #06b6d4;
+      border: 1px solid #6366f1;
       transition: transform 0.2s, box-shadow 0.2s;
     }
     .summary-row:hover {
       transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
-      border-color: #0891b2;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+      border-color: #4f46e5;
     }
     .summary-pair {
       display: flex !important;
@@ -705,10 +734,10 @@
     }
     .summary-label {
       font-size: 13px;
-      color: #0e7490;
+      color: #4338ca;
       font-weight: bold;
       white-space: nowrap !important;
-      background-color: rgba(6, 182, 212, 0.1);
+      background-color: rgba(99, 102, 241, 0.1);
       padding: 8px 12px !important;
       border-radius: 6px;
       flex-shrink: 0 !important;
@@ -743,9 +772,9 @@
     .total-section {
       margin-top: 20px;
       padding: 16px;
-      background: linear-gradient(to right, #ecfeff, #f0f9ff);
+      background: linear-gradient(to right, #eef2ff, #e0e7ff);
       border-radius: 12px;
-      border: 2px solid #06b6d4;
+      border: 2px solid #6366f1;
     }
     /* 合計セクション内の summary-row はより大きなフォントで表示 */
     .total-section .summary-label {
@@ -761,7 +790,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400">
+<body class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200">
   <!-- トップバー -->
   <div class="bg-white/95 backdrop-blur-sm shadow-lg border-b-4 border-cyan-500">
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -778,6 +807,7 @@
   <div class="max-w-7xl mx-auto px-6 py-6">
     <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-2 flex flex-wrap gap-2">
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md" onclick="switchTab('today')">本日の出勤</button>
+      <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('requests')">申請</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('manual')">手動記録</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('management')">人員追加</button>
       <button class="tab-button px-6 py-3 rounded-xl font-bold transition duration-200 hover:bg-cyan-50 text-gray-700" onclick="switchTab('stats')">統計</button>
@@ -794,6 +824,17 @@
       <div class="bg-white rounded-2xl shadow-xl p-8">
         <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">本日の出勤状況</h2>
         <div id="todayStats"></div>
+      </div>
+    </div>
+
+    <!-- 申請タブ -->
+    <div id="requests" class="container hidden">
+      <div class="bg-white rounded-2xl shadow-xl p-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">打刻し忘れの申請</h2>
+        <p class="text-gray-600 mb-6 bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">
+          本人からの申請です。内容を確認して「承認」すると出勤記録に反映されます。
+        </p>
+        <div id="requestsList"></div>
       </div>
     </div>
 
@@ -852,11 +893,6 @@
           <div>
             <label for="personName" class="block text-sm font-bold text-gray-700 mb-2">氏名:</label>
             <input type="text" id="personName" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
-          </div>
-
-          <div>
-            <label for="personFurigana" class="block text-sm font-bold text-gray-700 mb-2">ふりがな:</label>
-            <input type="text" id="personFurigana" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition" placeholder="やまだ たろう">
           </div>
 
           <div>
@@ -989,48 +1025,30 @@
         <h2 class="text-2xl font-bold text-gray-800 mb-6 pb-3 border-b-2 border-cyan-500">設定</h2>
         
         <div class="mb-6">
-          <h3 class="text-xl font-bold text-red-600 mb-2 border-b-2 border-red-600 pb-2">危険な操作</h3>
-          <p class="text-gray-600 bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+          <h3 class="text-xl font-bold text-rose-700 mb-2 border-b-2 border-rose-600 pb-2">危険な操作</h3>
+          <p class="text-rose-800 bg-rose-50 p-4 rounded-lg border-l-4 border-rose-500">
             以下の操作は取り消せません。十分注意して実行してください。
           </p>
         </div>
 
-        <div class="bg-yellow-50 p-6 rounded-xl border-l-4 border-yellow-500 mb-6 shadow-md">
-          <h4 class="text-lg font-bold text-yellow-800 mb-3">月を選択して出勤記録を削除</h4>
-          <p class="text-yellow-800 mb-4">
-            指定した月の出勤記録のみ削除します。<br>
+        <div class="bg-rose-50 p-6 rounded-xl border border-rose-200 border-l-4 border-l-rose-500 shadow-sm">
+          <h4 class="text-lg font-bold text-rose-800 mb-3">期間を指定して出勤記録を削除</h4>
+          <p class="text-rose-800 mb-4">
+            指定した期間（開始日〜終了日）の出勤記録のみ削除します。<br>
             <strong>※ 人員情報は削除されません</strong>
           </p>
-          <div class="mb-4">
-            <label for="deleteMonthSelect" class="block text-sm font-bold text-gray-700 mb-2">削除対象の月:</label>
-            <select id="deleteMonthSelect" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 outline-none transition">
-              <option value="">--- 選択してください ---</option>
-            </select>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label for="deleteStartDate" class="block text-sm font-bold text-gray-700 mb-2">開始日:</label>
+              <input type="date" id="deleteStartDate" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition">
+            </div>
+            <div>
+              <label for="deleteEndDate" class="block text-sm font-bold text-gray-700 mb-2">終了日:</label>
+              <input type="date" id="deleteEndDate" class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none transition">
+            </div>
           </div>
-          <button onclick="deleteRecordsByMonth()" class="px-6 py-3 bg-amber-600 text-white rounded-xl font-bold hover:bg-amber-700 transition duration-200 shadow-lg hover:shadow-xl">
-            選択月の出勤記録を削除
-          </button>
-        </div>
-
-        <div class="bg-yellow-50 p-6 rounded-xl border-l-4 border-yellow-500 mb-6 shadow-md">
-          <h4 class="text-lg font-bold text-yellow-800 mb-3">出勤記録を全て削除</h4>
-          <p class="text-yellow-800 mb-4">
-            年度末などに、全ての出勤記録を削除します。<br>
-            <strong>※ 人員情報は削除されません（出勤記録のみ削除されます）</strong>
-          </p>
-          <button onclick="deleteAllRecords()" class="px-6 py-3 bg-yellow-600 text-white rounded-xl font-bold hover:bg-yellow-700 transition duration-200 shadow-lg hover:shadow-xl">
-            全ての出勤記録を削除
-          </button>
-        </div>
-
-        <div class="bg-red-50 p-6 rounded-xl border-l-4 border-red-600 shadow-md">
-          <h4 class="text-lg font-bold text-red-800 mb-3">全データを削除</h4>
-          <p class="text-red-800 mb-4">
-            全ての人員情報と出勤記録を削除します。<br>
-            <strong>※ システムを完全にリセットします</strong>
-          </p>
-          <button onclick="deleteAllData()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition duration-200 shadow-lg hover:shadow-xl">
-            全データを削除（完全リセット）
+          <button onclick="deleteRecordsByRange()" class="px-6 py-3 bg-rose-600 text-white rounded-xl font-bold hover:bg-rose-700 transition duration-200 shadow-lg hover:shadow-xl">
+            この期間の出勤記録を削除
           </button>
         </div>
       </div>
@@ -1054,6 +1072,7 @@
 
     let people = [];
     let records = [];
+    let requests = [];
 
     // 統一された日付フォーマット関数
     function getDateString(date) {
@@ -1163,6 +1182,10 @@
         const recordsSnapshot = await db.collection('records').orderBy('timestamp', 'desc').get();
         records = recordsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
+        // 申請データ読み込み
+        const requestsSnapshot = await db.collection('requests').get();
+        requests = requestsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
         updatePersonList();
         updateTodayStats();
       } catch (error) {
@@ -1201,6 +1224,9 @@
         case 'today':
           updateTodayStats();
           break;
+        case 'requests':
+          renderRequests();
+          break;
         case 'monthly':
           populateMonthSelect();
           break;
@@ -1211,7 +1237,6 @@
           // 検索タブは特に処理なし
           break;
         case 'settings':
-          populateDeleteMonthSelect();
           break;
       }
     }
@@ -1244,7 +1269,6 @@
 
       const name = document.getElementById('personName').value;
       const homeStation = document.getElementById('homeStation').value;
-      const furigana = document.getElementById('personFurigana').value;
       const order = parseInt(document.getElementById('personOrder').value) || 0;
       const homeFare = parseInt(document.getElementById('homeFare').value);
       const homePassFare = document.getElementById('homePassFare').value ? parseInt(document.getElementById('homePassFare').value) : null;
@@ -1257,11 +1281,6 @@
         return;
       }
 
-      if (!furigana.trim()) {
-        alert('ふりがなを入力してください');
-        return;
-      }
-
       const submitBtn = document.getElementById('addPersonBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = '登録中...';
@@ -1269,7 +1288,6 @@
       try {
         const personData = {
           name: name,
-          furigana: furigana,
           order: order,
           homeStation: homeStation,
           homeFare: homeFare,
@@ -1340,13 +1358,6 @@
       }
 
       try {
-        const furigana = prompt('ふりがな:', person.furigana || '');
-        if (furigana === null) return;
-        if (!furigana.trim()) {
-          alert('ふりがなを入力してください');
-          return;
-        }
-
         const orderStr = prompt('表示順序:', person.order || 0);
         if (orderStr === null) return;
         const order = parseInt(orderStr) || 0;
@@ -1361,7 +1372,6 @@
 
         const updateData = {
           name: name.trim(),
-          furigana: furigana.trim(),
           order: order,
           homeStation: homeStation.trim(),
           homeFare: homeFare,
@@ -1462,7 +1472,7 @@
           <div class="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-xl shadow-md border-2 border-cyan-200 hover:shadow-lg transition mb-4">
             <div class="text-xl font-bold text-gray-800 mb-3">${p.name}</div>
             <div class="text-sm text-gray-600 mb-4 bg-white p-3 rounded-lg">
-              <div class="mb-1"><span class="font-bold">ふりがな:</span> ${p.furigana || '-'} | <span class="font-bold">表示順序:</span> ${p.order || 0}</div>
+              <div class="mb-1"><span class="font-bold">表示順序:</span> ${p.order || 0}</div>
               <div class="mb-1"><span class="font-bold">家最寄り駅:</span> ${p.homeStation} (<span class="text-cyan-600 font-bold">¥${p.homeFare.toLocaleString()}</span>${p.homePassFare ? ` / 定期: ¥${p.homePassFare.toLocaleString()}` : ''})</div>
               <div><span class="font-bold">大学最寄り駅:</span> ${p.universityStation} (<span class="text-cyan-600 font-bold">¥${p.universityFare.toLocaleString()}</span>${p.universityPassFare ? ` / 定期: ¥${p.universityPassFare.toLocaleString()}` : ''})</div>
             </div>
@@ -1566,20 +1576,6 @@
       }
     }
 
-    // 削除対象の月選択リストを生成
-    function populateDeleteMonthSelect() {
-      const deleteMonthSelect = document.getElementById('deleteMonthSelect');
-      const sortedMonths = getAvailableMonthKeys();
-      const previousValue = deleteMonthSelect.value;
-
-      deleteMonthSelect.innerHTML = '<option value="">--- 選択してください ---</option>' +
-        sortedMonths.map(m => `<option value="${m}">${m}</option>`).join('');
-
-      if (previousValue && sortedMonths.includes(previousValue)) {
-        deleteMonthSelect.value = previousValue;
-      }
-    }
-
     // 統計表示
     function updateStats() {
       const startMonthValue = document.getElementById('statsStartMonthSelect').value;
@@ -1662,7 +1658,7 @@
       // 印刷用コンテンツも更新（サイズを少し小さく、交通費総合計を追加）
       const printHtml = `
         <div style="page-break-inside: avoid; page-break-after: avoid;">
-          <h2 style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #06b6d4; padding-bottom: 10px; font-size: 18px; font-weight: bold;">${title}</h2>
+          <h2 style="text-align: center; margin-bottom: 12px; border-bottom: 2px solid #6366f1; padding-bottom: 10px; font-size: 18px; font-weight: bold;">${title}</h2>
           <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;">
             <thead>
               <tr style="background-color: #f0f0f0; border-bottom: 1px solid #333;">
@@ -1911,6 +1907,11 @@
       const dayStr = String(parseInt(day)).padStart(2, '0');
       const formattedDate = `${year}/${monthStr}/${dayStr}`;
 
+      if (!person) {
+        alert('氏名を選択してください');
+        return;
+      }
+
       const submitBtn = document.getElementById('manualSubmitBtn');
       submitBtn.disabled = true;
       submitBtn.textContent = '記録中...';
@@ -1929,15 +1930,39 @@
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('records').add(recordData);
-        records.unshift({ id: Date.now(), ...recordData });
+        // 同じ人・同じ日は1回まで。読み込み済みの全記録(旧ランダムIDの記録も含む)で確認する。
+        const alreadyExists = records.some(r => r.personId === person.id && r.date === formattedDate);
+        if (alreadyExists) {
+          alert(`${person.name} さんの ${formattedDate} の記録は既に存在します。\n同じ日付には1回までしか登録できません。`);
+          return;
+        }
+
+        // 出勤ページと同じ「人＋日付」の決定的IDにして、同時追加でも二重にならないようにする
+        const docId = `${person.id}_${formattedDate.replace(/\//g, '-')}`;
+        const recordRef = db.collection('records').doc(docId);
+
+        await db.runTransaction(async (transaction) => {
+          const existing = await transaction.get(recordRef);
+          if (existing.exists) {
+            const err = new Error('already-recorded');
+            err.code = 'already-recorded';
+            throw err;
+          }
+          transaction.set(recordRef, recordData);
+        });
+
+        records.unshift({ id: docId, ...recordData });
 
         this.reset();
         updateManualForm();  // フォームをリセット
         alert('記録を追加しました');
       } catch (error) {
-        console.error('記録エラー:', error);
-        alert('記録の追加に失敗しました: ' + error.message);
+        if (error && error.code === 'already-recorded') {
+          alert(`${person.name} さんの ${formattedDate} の記録は既に存在します。\n同じ日付には1回までしか登録できません。`);
+        } else {
+          console.error('記録エラー:', error);
+          alert('記録の追加に失敗しました: ' + error.message);
+        }
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = '記録を追加';
@@ -1945,76 +1970,47 @@
     });
 
     // 出勤記録を全て削除
-    async function deleteAllRecords() {
-      const confirmation = prompt('本当に全ての出勤記録を削除しますか？\n※ この操作は取り消せません\n\n削除する場合は「削除する」と入力してください:');
-      
-      if (confirmation !== '削除する') {
-        alert('キャンセルしました');
+    // 期間を指定して出勤記録を削除
+    async function deleteRecordsByRange() {
+      const startInput = document.getElementById('deleteStartDate').value;
+      const endInput = document.getElementById('deleteEndDate').value;
+
+      if (!startInput || !endInput) {
+        alert('開始日と終了日を両方入力してください');
+        return;
+      }
+      if (startInput > endInput) {
+        alert('開始日は終了日より前の日付にしてください');
         return;
       }
 
-      const secondConfirmation = confirm('最終確認：全ての出勤記録を削除します。\n人員情報は残ります。\n\n本当に実行しますか？');
-      
-      if (!secondConfirmation) {
-        alert('キャンセルしました');
-        return;
-      }
-
-      try {
-        // Firestoreから全ての出勤記録を削除
-        const recordsSnapshot = await db.collection('records').get();
-        const batch = db.batch();
-        
-        recordsSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-        });
-
-        await batch.commit();
-        
-        // ローカルデータもクリア
-        records = [];
-        
-        alert(`${recordsSnapshot.size}件の出勤記録を削除しました`);
-        updateTodayStats();
-        updatePersonList();
-        updateStats();
-        populateMonthSelect();
-        populateStatsMonthSelect();
-        populateDeleteMonthSelect();
-      } catch (error) {
-        console.error('削除エラー:', error);
-        alert('削除に失敗しました: ' + error.message);
-      }
-    }
-
-    // 選択した月の出勤記録を削除
-    async function deleteRecordsByMonth() {
-      const monthValue = document.getElementById('deleteMonthSelect').value;
-      if (!monthValue) {
-        alert('削除する月を選択してください');
-        return;
-      }
+      // 入力(YYYY-MM-DD)を記録の日付形式(YYYY/MM/DD)へ変換して比較する
+      const toKey = (s) => s.replace(/-/g, '/');
+      const startKey = toKey(startInput);
+      const endKey = toKey(endInput);
 
       const targetRecords = records.filter(r => {
         if (!r.date) return false;
         const parts = r.date.split('/');
-        return parts.length === 3 && `${parts[0]}/${parts[1]}` === monthValue;
+        if (parts.length !== 3) return false;
+        const key = `${parts[0]}/${parts[1].padStart(2, '0')}/${parts[2].padStart(2, '0')}`;
+        return key >= startKey && key <= endKey;
       });
 
       if (targetRecords.length === 0) {
-        alert(`${monthValue} の出勤記録はありません`);
+        alert(`${startKey} 〜 ${endKey} の出勤記録はありません`);
         return;
       }
 
       const confirmation = prompt(
-        `${monthValue} の出勤記録 ${targetRecords.length}件 を削除します。\n※ この操作は取り消せません\n\n削除する場合は「削除する」と入力してください:`
+        `${startKey} 〜 ${endKey} の出勤記録 ${targetRecords.length}件 を削除します。\n※ この操作は取り消せません\n\n削除する場合は「削除する」と入力してください:`
       );
       if (confirmation !== '削除する') {
         alert('キャンセルしました');
         return;
       }
 
-      const secondConfirmation = confirm(`${monthValue} の出勤記録を削除します。\n本当に実行しますか？`);
+      const secondConfirmation = confirm(`${startKey} 〜 ${endKey} の出勤記録 ${targetRecords.length}件 を削除します。\n本当に実行しますか？`);
       if (!secondConfirmation) {
         alert('キャンセルしました');
         return;
@@ -2029,78 +2025,17 @@
         });
         await batch.commit();
 
-        records = records.filter(r => {
-          if (!r.date) return true;
-          const parts = r.date.split('/');
-          if (parts.length !== 3) return true;
-          return `${parts[0]}/${parts[1]}` !== monthValue;
-        });
+        const deletedIds = new Set(targetRecords.map(r => r.id));
+        records = records.filter(r => !deletedIds.has(r.id));
 
-        alert(`${monthValue} の出勤記録を ${targetRecords.length}件 削除しました`);
+        alert(`${startKey} 〜 ${endKey} の出勤記録を ${targetRecords.length}件 削除しました`);
         updateTodayStats();
         updateStats();
         updatePersonList();
         populateMonthSelect();
         populateStatsMonthSelect();
-        populateDeleteMonthSelect();
       } catch (error) {
-        console.error('月別削除エラー:', error);
-        alert('削除に失敗しました: ' + error.message);
-      }
-    }
-
-    // 全データを削除（完全リセット）
-    async function deleteAllData() {
-      const confirmation = prompt('警告：全てのデータを削除します！\n・全ての人員情報\n・全ての出勤記録\n※ この操作は取り消せません\n\n削除する場合は「完全削除」と入力してください:');
-      
-      if (confirmation !== '完全削除') {
-        alert('キャンセルしました');
-        return;
-      }
-
-      const secondConfirmation = confirm('最終確認：システムを完全にリセットします。\n全てのデータが削除されます。\n\n本当に実行しますか？');
-      
-      if (!secondConfirmation) {
-        alert('キャンセルしました');
-        return;
-      }
-
-      try {
-        const batch = db.batch();
-        let deleteCount = 0;
-
-        // 全ての人員を削除
-        const peopleSnapshot = await db.collection('people').get();
-        peopleSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-          deleteCount++;
-        });
-
-        // 全ての出勤記録を削除
-        const recordsSnapshot = await db.collection('records').get();
-        recordsSnapshot.docs.forEach(doc => {
-          batch.delete(doc.ref);
-          deleteCount++;
-        });
-
-        await batch.commit();
-        
-        // ローカルデータもクリア
-        people = [];
-        records = [];
-        
-        alert(`${deleteCount}件のデータを削除しました\nシステムがリセットされました`);
-        
-        // 全画面を更新
-        updatePersonList();
-        updateTodayStats();
-        updateStats();
-        updateManualForm();
-        populateMonthSelect();
-        populateStatsMonthSelect();
-        populateDeleteMonthSelect();
-      } catch (error) {
-        console.error('削除エラー:', error);
+        console.error('期間削除エラー:', error);
         alert('削除に失敗しました: ' + error.message);
       }
     }
@@ -2117,7 +2052,7 @@
 
       // 名前で人を検索（部分一致）
       const matchedPeople = people.filter(p => 
-        p.name.includes(searchName) || (p.furigana && p.furigana.includes(searchName))
+        p.name.includes(searchName)
       );
 
       if (matchedPeople.length === 0) {
@@ -2207,12 +2142,151 @@
         updateStats();
         populateMonthSelect();
         populateStatsMonthSelect();
-        populateDeleteMonthSelect();
         
         alert('記録を削除しました');
       } catch (error) {
         console.error('削除エラー:', error);
         alert('削除に失敗しました: ' + error.message);
+      }
+    }
+
+    // ===== 打刻し忘れの申請機能 =====
+
+    // 申請一覧の描画（承認待ち → 処理済み）
+    function renderRequests() {
+      const container = document.getElementById('requestsList');
+      if (!container) return;
+
+      const sortByDateDesc = (a, b) => (b.date || '').localeCompare(a.date || '');
+      const pending = requests.filter(r => r.status === 'pending').sort(sortByDateDesc);
+
+      let html = '';
+
+      html += '<h3 class="text-lg font-bold text-gray-800 mb-3">承認待ち</h3>';
+      if (pending.length === 0) {
+        html += '<p class="text-gray-500">承認待ちの申請はありません</p>';
+      } else {
+        html += '<div class="space-y-3">';
+        pending.forEach(r => {
+          html += `
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50">
+              <div>
+                <div class="font-bold text-gray-800">${r.personName || '(不明)'} <span class="text-gray-500 font-normal">/ ${r.date || '-'}</span></div>
+                <div class="text-sm text-gray-600">${r.route || ''}</div>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="approveRequest('${r.id}')" class="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg font-bold hover:from-blue-700 hover:to-cyan-700 transition shadow">承認</button>
+                <button onclick="rejectRequest('${r.id}')" class="px-5 py-2 bg-rose-600 text-white rounded-lg font-bold hover:bg-rose-700 transition shadow">却下</button>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    // 申請ステータスを承認済みに更新（共通処理）
+    async function markRequestApproved(requestId) {
+      await db.collection('requests').doc(requestId).update({
+        status: 'approved',
+        decidedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const idx = requests.findIndex(r => r.id === requestId);
+      if (idx !== -1) requests[idx].status = 'approved';
+    }
+
+    // 承認：出勤記録に本登録し、申請を承認済みにする
+    async function approveRequest(requestId) {
+      const request = requests.find(r => r.id === requestId);
+      if (!request) return;
+
+      if (!confirm(`${request.personName} さんの ${request.date}（${request.route}）を承認して出勤記録に反映しますか？`)) {
+        return;
+      }
+
+      try {
+        // 既に同じ人・同じ日付の記録があるか（重複登録を防ぐ）
+        const alreadyExists = records.some(r => r.personId === request.personId && r.date === request.date);
+
+        if (!alreadyExists) {
+          const recordData = {
+            personId: request.personId,
+            personName: request.personName,
+            route: request.route,
+            date: request.date,
+            time: '00:00:00',
+            lat: 0,
+            lng: 0,
+            distance: 0,
+            manual: true,
+            fromRequest: true,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          };
+
+          // 出勤ページと同じ「人＋日付」の決定的IDで、同時操作でも二重にならない
+          const docId = `${request.personId}_${request.date.replace(/\//g, '-')}`;
+          const recordRef = db.collection('records').doc(docId);
+
+          await db.runTransaction(async (transaction) => {
+            const existing = await transaction.get(recordRef);
+            if (existing.exists) {
+              const err = new Error('already-recorded');
+              err.code = 'already-recorded';
+              throw err;
+            }
+            transaction.set(recordRef, recordData);
+          });
+
+          records.unshift({ id: docId, ...recordData });
+        }
+
+        await markRequestApproved(requestId);
+
+        alert(alreadyExists
+          ? `${request.date} は既に記録があったため、申請を承認済みにしました（記録は重複追加していません）。`
+          : '承認して出勤記録に反映しました');
+
+        renderRequests();
+        updateTodayStats();
+        updateStats();
+        updatePersonList();
+        populateMonthSelect();
+        populateStatsMonthSelect();
+      } catch (error) {
+        if (error && error.code === 'already-recorded') {
+          // レース時：既に記録が入っていたのでステータスだけ承認済みに
+          await markRequestApproved(requestId);
+          alert('既に記録があったため、申請を承認済みにしました。');
+          renderRequests();
+        } else {
+          console.error('承認エラー:', error);
+          alert('承認に失敗しました: ' + error.message);
+        }
+      }
+    }
+
+    // 却下：申請を却下にする（記録は作らない）
+    async function rejectRequest(requestId) {
+      const request = requests.find(r => r.id === requestId);
+      if (!request) return;
+
+      if (!confirm(`${request.personName} さんの ${request.date} の申請を却下しますか？`)) {
+        return;
+      }
+
+      try {
+        await db.collection('requests').doc(requestId).update({
+          status: 'rejected',
+          decidedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        const idx = requests.findIndex(r => r.id === requestId);
+        if (idx !== -1) requests[idx].status = 'rejected';
+
+        renderRequests();
+      } catch (error) {
+        console.error('却下エラー:', error);
+        alert('却下に失敗しました: ' + error.message);
       }
     }
 

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>出勤の申請（打刻し忘れ用）</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // 出勤ページと同じ業務系ブランドカラー(落ち着いたインディゴ)。
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Segoe UI"', '"Hiragino Kaku Gothic ProN"', '"Noto Sans JP"', 'Meiryo', 'sans-serif'],
+          },
+          colors: {
+            brand: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            blue: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#6366f1',500:'#4f46e5',600:'#4338ca',700:'#3730a3',800:'#312e81',900:'#1e1b4b',950:'#131033' },
+            cyan: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            teal: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-in { animation: slideIn 0.3s ease-out; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    @keyframes checkPop {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-check-pop { animation: checkPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+    .confetti-piece {
+      position: fixed;
+      top: -12px;
+      width: 9px;
+      height: 14px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 60;
+      opacity: 0;
+      animation: confettiFall var(--dur, 2.4s) linear forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0.9; }
+    }
+
+    button, .transition { transition: all 0.2s ease; }
+    button:active { transform: translateY(1px) scale(0.99); }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 p-4 md:p-8">
+  <div class="max-w-2xl mx-auto animate-fade-up">
+    <div class="bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 overflow-hidden">
+      <!-- ヘッダー帯 -->
+      <div class="bg-gradient-to-r from-brand-700 to-brand-600 px-8 py-7 text-center">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/15 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide">打刻忘れ</h1>
+      </div>
+
+      <div class="p-8 md:p-10">
+        <div class="mb-6 rounded-xl p-4 bg-brand-50 border border-brand-200 text-brand-800 text-sm">
+          打刻を忘れた日を申請してください。管理者が確認して承認すると、出勤記録に反映されます。<br>
+          <strong>※ 申請できるのは今月分のみです。</strong>
+        </div>
+
+        <form id="requestForm" class="space-y-6">
+          <!-- 氏名選択 -->
+          <div>
+            <label for="personName" class="block text-sm font-bold text-gray-700 mb-2">氏名</label>
+            <select id="personName" required
+              class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 transition duration-200">
+              <option value="">--- 選択してください ---</option>
+            </select>
+          </div>
+
+          <!-- 日付 -->
+          <div>
+            <label for="requestDate" class="block text-sm font-bold text-gray-700 mb-2">日付（忘れた日）</label>
+            <input type="date" id="requestDate" required
+              class="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:ring focus:ring-cyan-200 focus:ring-opacity-50 transition duration-200">
+          </div>
+
+          <!-- 交通経路 -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-3">交通経路</label>
+            <div class="space-y-3">
+              <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-cyan-50 transition duration-200 has-[:checked]:border-cyan-500 has-[:checked]:bg-cyan-50">
+                <input type="radio" name="route" value="自宅→事務所" required class="w-5 h-5 text-cyan-600 focus:ring-cyan-500">
+                <span class="ml-3 text-lg font-medium text-gray-700">家 → 事務所</span>
+              </label>
+              <label class="flex items-center p-4 border-2 border-gray-300 rounded-xl cursor-pointer hover:bg-cyan-50 transition duration-200 has-[:checked]:border-cyan-500 has-[:checked]:bg-cyan-50">
+                <input type="radio" name="route" value="学校→事務所" class="w-5 h-5 text-cyan-600 focus:ring-cyan-500">
+                <span class="ml-3 text-lg font-medium text-gray-700">学校 → 事務所</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 送信ボタン -->
+          <button type="submit" id="submitBtn"
+            class="w-full py-4 text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-cyan-600 rounded-xl hover:from-blue-700 hover:to-cyan-700 focus:outline-none focus:ring-4 focus:ring-cyan-300 transition duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+            申請する
+          </button>
+        </form>
+
+        <!-- 成功メッセージ -->
+        <div id="successMessage" class="hidden mt-6 p-6 bg-green-50 border border-green-300 text-green-800 rounded-xl text-center font-semibold animate-slide-in">
+          <div id="successCheck" class="mx-auto mb-3 w-14 h-14 rounded-full bg-green-500 flex items-center justify-center animate-check-pop">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <div id="successTitle" class="text-lg mb-1">申請しました！</div>
+          <div class="text-base text-green-700">管理者の承認をお待ちください</div>
+        </div>
+
+        <!-- 申請状況 -->
+        <div id="statusSection" class="hidden mt-8 pt-6 border-t border-slate-200">
+          <h2 class="text-lg font-bold text-gray-800 mb-3">申請状況</h2>
+          <div id="myRequests" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+        </div>
+
+        <!-- 通常の出勤記録へ戻る -->
+        <div class="mt-8 text-center">
+          <a href="attendance.html" class="text-brand-700 font-semibold underline">通常の出勤記録へ戻る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDwCSI2kDqV7eMPqwBh0nNDORdGtw5aydQ",
+      authDomain: "kdaikda.firebaseapp.com",
+      projectId: "kdaikda",
+      storageBucket: "kdaikda.firebasestorage.app",
+      messagingSenderId: "640889239505",
+      appId: "1:640889239505:web:993aa3aba77560837f12f0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let people = [];
+
+    function getDateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}/${m}/${d}`;
+    }
+    function getJSTDateString() {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const jst = new Date(utcMs + 9 * 60 * 60000);
+      return getDateString(jst);
+    }
+    // <input type="date"> の値(YYYY-MM-DD)を記録形式(YYYY/MM/DD)へ変換
+    function toRecordDate(inputValue) {
+      const [y, m, d] = inputValue.split('-');
+      return `${y}/${String(parseInt(m)).padStart(2, '0')}/${String(parseInt(d)).padStart(2, '0')}`;
+    }
+
+    let successHideTimer = null;
+    function showSuccess(title) {
+      const successMessage = document.getElementById('successMessage');
+      document.getElementById('successTitle').textContent = title;
+      successMessage.classList.remove('hidden');
+
+      const check = document.getElementById('successCheck');
+      if (check) {
+        check.classList.remove('animate-check-pop');
+        void check.offsetWidth;
+        check.classList.add('animate-check-pop');
+      }
+      launchConfetti();
+
+      if (successHideTimer) clearTimeout(successHideTimer);
+      successHideTimer = setTimeout(() => {
+        successMessage.classList.add('hidden');
+      }, 5000);
+    }
+
+    function launchConfetti() {
+      const colors = ['#4f46e5', '#6366f1', '#818cf8', '#22c55e', '#f59e0b', '#ec4899'];
+      const count = 90;
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.setProperty('--dur', (2 + Math.random() * 1.6) + 's');
+        piece.style.animationDelay = (Math.random() * 0.3) + 's';
+        piece.style.width = (6 + Math.random() * 6) + 'px';
+        piece.style.height = (10 + Math.random() * 8) + 'px';
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 4200);
+      }
+    }
+
+    async function loadPeople() {
+      try {
+        const snapshot = await db.collection('people').get();
+        people = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const sorted = [...people]
+          .filter(p => p.name)
+          .sort((a, b) => {
+            const orderA = (a.order !== undefined && a.order !== null) ? Number(a.order) : 999;
+            const orderB = (b.order !== undefined && b.order !== null) ? Number(b.order) : 999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.name || '').localeCompare(b.name || '');
+          });
+
+        const select = document.getElementById('personName');
+        select.innerHTML = '<option value="">--- 選択してください ---</option>' +
+          sorted.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      } catch (error) {
+        console.error('人員読み込みエラー:', error);
+      }
+    }
+
+    // 状態バッジ
+    function statusBadge(status) {
+      if (status === 'approved') {
+        return '<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">承認済</span>';
+      }
+      if (status === 'rejected') {
+        return '<span class="px-2 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">却下</span>';
+      }
+      return '<span class="px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">承認待ち</span>';
+    }
+
+    // 選択中の人の申請一覧を表示
+    async function renderMyRequests(personId) {
+      const section = document.getElementById('statusSection');
+      const list = document.getElementById('myRequests');
+
+      if (!personId) {
+        section.classList.add('hidden');
+        list.innerHTML = '';
+        return;
+      }
+
+      try {
+        const snapshot = await db.collection('requests').where('personId', '==', personId).get();
+        const myRequests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // 日付の新しい順に並べる
+        myRequests.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+        section.classList.remove('hidden');
+
+        if (myRequests.length === 0) {
+          list.innerHTML = '<p class="text-gray-500 text-sm">まだ申請はありません</p>';
+          return;
+        }
+
+        list.innerHTML = myRequests.map(r => `
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50">
+            <div>
+              <div class="font-bold text-gray-800">${r.date || '-'}</div>
+              <div class="text-sm text-gray-500">${r.route || ''}</div>
+            </div>
+            ${statusBadge(r.status)}
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('申請一覧の取得エラー:', error);
+      }
+    }
+
+    document.getElementById('personName').addEventListener('change', function () {
+      renderMyRequests(this.value);
+    });
+
+    document.getElementById('requestForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const personId = document.getElementById('personName').value;
+      if (!personId) {
+        alert('氏名を選択してください');
+        return;
+      }
+      const person = people.find(p => p.id === personId);
+      if (!person) {
+        alert('選択された人が見つかりません');
+        return;
+      }
+
+      const dateInput = document.getElementById('requestDate').value;
+      if (!dateInput) {
+        alert('日付を選択してください');
+        return;
+      }
+      const requestDate = toRecordDate(dateInput);
+
+      // 未来日は申請できないようにする
+      if (requestDate > getJSTDateString()) {
+        alert('未来の日付は申請できません');
+        return;
+      }
+
+      // 今月分のみ申請できる（月ごとに精算しているため）
+      const currentMonthKey = getJSTDateString().slice(0, 7); // "YYYY/MM"
+      if (requestDate.slice(0, 7) !== currentMonthKey) {
+        alert(`今月（${currentMonthKey}）分のみ申請できます`);
+        return;
+      }
+
+      const route = document.querySelector('input[name="route"]:checked').value;
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = '申請中...';
+
+      try {
+        // 既に出勤記録がある日は申請不要
+        const recordSnapshot = await db.collection('records').where('personId', '==', person.id).get();
+        const hasRecord = recordSnapshot.docs.some(doc => doc.data().date === requestDate);
+        if (hasRecord) {
+          alert(`${requestDate} は既に出勤記録があります。申請は不要です。`);
+          return;
+        }
+
+        // 同じ人・同じ日付の申請が既にあるか確認
+        const reqSnapshot = await db.collection('requests').where('personId', '==', person.id).get();
+        const existing = reqSnapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .find(r => r.date === requestDate && (r.status === 'pending' || r.status === 'approved'));
+        if (existing) {
+          if (existing.status === 'pending') {
+            alert(`${requestDate} は既に申請済みです（承認待ち）。`);
+          } else {
+            alert(`${requestDate} は既に承認済みです。`);
+          }
+          renderMyRequests(person.id);
+          return;
+        }
+
+        await db.collection('requests').add({
+          personId: person.id,
+          personName: person.name,
+          date: requestDate,
+          route: route,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        showSuccess('申請しました！');
+        renderMyRequests(person.id);
+      } catch (error) {
+        console.error('申請エラー:', error);
+        alert('申請に失敗しました');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '申請する';
+      }
+    });
+
+    // 初期化：日付の既定を今日に
+    (function init() {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const jst = new Date(utcMs + 9 * 60 * 60000);
+      const y = jst.getFullYear();
+      const m = String(jst.getMonth() + 1).padStart(2, '0');
+      const d = String(jst.getDate()).padStart(2, '0');
+      const dateEl = document.getElementById('requestDate');
+      dateEl.value = `${y}-${m}-${d}`;
+      // 今月分のみ申請可能：1日〜今日の範囲に制限
+      dateEl.min = `${y}-${m}-01`;
+      dateEl.max = `${y}-${m}-${d}`;
+    })();
+
+    loadPeople();
+  </script>
+</body>
+</html>

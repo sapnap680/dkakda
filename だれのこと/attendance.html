@@ -10,31 +10,82 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // 業務系ブランドカラー(落ち着いたインディゴ)へ統一。
+    // 既存マークアップの blue / cyan / teal クラスをまとめて上書きする。
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Segoe UI"', '"Hiragino Kaku Gothic ProN"', '"Noto Sans JP"', 'Meiryo', 'sans-serif'],
+          },
+          colors: {
+            brand: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            blue: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#6366f1',500:'#4f46e5',600:'#4338ca',700:'#3730a3',800:'#312e81',900:'#1e1b4b',950:'#131033' },
+            cyan: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+            teal: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81',950:'#1e1b4b' },
+          }
+        }
+      }
+    };
+  </script>
   <style>
     @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .animate-slide-in {
-      animation: slideIn 0.3s ease-out;
+    .animate-slide-in { animation: slideIn 0.3s ease-out; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+    .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+    @keyframes checkPop {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-check-pop { animation: checkPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+    /* 記録成功時のコンフェッティ(紙吹雪) */
+    .confetti-piece {
+      position: fixed;
+      top: -12px;
+      width: 9px;
+      height: 14px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 60;
+      opacity: 0;
+      animation: confettiFall var(--dur, 2.4s) linear forwards;
+    }
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
+      100% { transform: translateY(105vh) rotateZ(720deg); opacity: 0.9; }
+    }
+
+    button, .transition { transition: all 0.2s ease; }
+    button:active { transform: translateY(1px) scale(0.99); }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400 p-4 md:p-8">
+<body class="min-h-screen bg-gradient-to-b from-slate-100 to-slate-200 p-4 md:p-8">
   <!-- メインコンテナ -->
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-2xl mx-auto animate-fade-up">
     <!-- 出勤記録フォーム -->
-    <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">出勤記録</h1>
-        
+    <div class="bg-white rounded-2xl shadow-xl ring-1 ring-slate-200 overflow-hidden">
+      <!-- ヘッダー帯 -->
+      <div class="bg-gradient-to-r from-brand-700 to-brand-600 px-8 py-7 text-center">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/15 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide">出勤記録</h1>
       </div>
+
+    <div class="p-8 md:p-10">
       
       <!-- 位置情報ステータス -->
       <div id="locationStatus" class="mb-6 rounded-xl p-4 text-center font-semibold"></div>
@@ -94,10 +145,21 @@
       </form>
 
       <!-- 成功メッセージ -->
-      <div id="successMessage" class="hidden mt-6 p-4 bg-green-50 border-2 border-green-500 text-green-800 rounded-xl text-center font-semibold animate-slide-in">
-        <div class="text-lg mb-2">出勤を記録しました！</div>
-        <div id="monthlyCountMessage" class="text-base"></div>
+      <div id="successMessage" class="hidden mt-6 p-6 bg-green-50 border border-green-300 text-green-800 rounded-xl text-center font-semibold animate-slide-in">
+        <div id="successCheck" class="mx-auto mb-3 w-14 h-14 rounded-full bg-green-500 flex items-center justify-center animate-check-pop">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div id="successTitle" class="text-lg mb-1">出勤を記録しました！</div>
+        <div id="monthlyCountMessage" class="text-base text-green-700"></div>
       </div>
+
+      <!-- 打刻し忘れの申請導線 -->
+      <div class="mt-6 text-center">
+        <a href="request.html" class="text-brand-700 font-semibold underline">打刻し忘れた場合はこちら → 申請する</a>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -124,6 +186,105 @@
     let people = [];
     let records = [];
     let currentPosition = null;
+
+    // 成功メッセージ＋チェックマーク＋紙吹雪をまとめて再生する。
+    // 登録は1日1回だが、この演出はボタンを押すたびに何度でも再生できる。
+    let successHideTimer = null;
+    function showSuccess(title, subMessage) {
+      const successMessage = document.getElementById('successMessage');
+      document.getElementById('successTitle').textContent = title;
+      document.getElementById('monthlyCountMessage').textContent = subMessage || '';
+
+      successMessage.classList.remove('hidden');
+
+      // チェックマークのポップアニメーションを毎回再生する
+      const check = document.getElementById('successCheck');
+      if (check) {
+        check.classList.remove('animate-check-pop');
+        void check.offsetWidth;
+        check.classList.add('animate-check-pop');
+      }
+
+      launchConfetti();
+
+      if (successHideTimer) clearTimeout(successHideTimer);
+      successHideTimer = setTimeout(() => {
+        successMessage.classList.add('hidden');
+      }, 5000);
+    }
+
+    // 記録成功時のコンフェッティ(紙吹雪)演出
+    function launchConfetti() {
+      const colors = ['#4f46e5', '#6366f1', '#818cf8', '#22c55e', '#f59e0b', '#ec4899'];
+      const count = 90;
+      for (let i = 0; i < count; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.setProperty('--dur', (2 + Math.random() * 1.6) + 's');
+        piece.style.animationDelay = (Math.random() * 0.3) + 's';
+        piece.style.width = (6 + Math.random() * 6) + 'px';
+        piece.style.height = (10 + Math.random() * 8) + 'px';
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 4200);
+      }
+    }
+
+    // 今月の「家から / 学校から」の回数を集計してメッセージを返す。
+    // 1日1回のため日付ごとに最新レコードのみを数える。
+    const monthlyMessageCache = {};
+    async function getMonthlyRouteMessage(person, forceRefresh) {
+      if (!forceRefresh && monthlyMessageCache[person.id]) {
+        return monthlyMessageCache[person.id];
+      }
+
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const jstNow = new Date(utcMs + 9 * 60 * 60000);
+      const year = jstNow.getFullYear();
+      const month = jstNow.getMonth() + 1;
+
+      const snapshot = await db.collection('records').get();
+      const monthlyRecords = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(r => {
+          if (!r.date || r.personId !== person.id) return false;
+          const parts = r.date.split('/');
+          if (parts.length !== 3) return false;
+          return parseInt(parts[0]) === year && parseInt(parts[1]) === month;
+        });
+
+      // 日付ごとに最新の記録のみ残す
+      const dateMap = new Map();
+      monthlyRecords.forEach(record => {
+        const date = record.date;
+        if (!dateMap.has(date)) {
+          dateMap.set(date, record);
+        } else {
+          const existing = dateMap.get(date);
+          const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
+          const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
+          if (currentTime > existingTime) {
+            dateMap.set(date, record);
+          }
+        }
+      });
+
+      let homeCount = 0;
+      let schoolCount = 0;
+      dateMap.forEach(record => {
+        if ((record.route || '').includes('学校')) {
+          schoolCount++;
+        } else {
+          homeCount++;
+        }
+      });
+
+      const msg = `今月は 家から${homeCount}回 ／ 学校から${schoolCount}回`;
+      monthlyMessageCache[person.id] = msg;
+      return msg;
+    }
 
     // 統一された日付フォーマット関数
     function getDateString(date) {
@@ -238,7 +399,6 @@
       e.preventDefault();
 
       const personId = document.getElementById('personName').value;
-      const successMessage = document.getElementById('successMessage');
 
       if (!personId) {
         alert('氏名を選択してください');
@@ -257,7 +417,9 @@
       );
 
       if (alreadyRecorded) {
-        alert('本日の出勤は既に記録されています。1日1回のみ記録できます。');
+        // 登録済みなので保存はしないが、演出だけは何度でも再生する
+        const monthlyMsg = await getMonthlyRouteMessage(person, false);
+        showSuccess('本日は記録済みです', monthlyMsg);
         return;
       }
 
@@ -281,11 +443,12 @@
       submitBtn.textContent = '記録中...';
 
       try {
+        const recordDate = getJSTDateString();
         const recordData = {
           personId: person.id,
           personName: person.name,
           route: route,
-          date: getJSTDateString(),
+          date: recordDate,
           time: getTimeString(now),
           lat: currentPosition.lat,
           lng: currentPosition.lng,
@@ -293,56 +456,41 @@
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('records').add(recordData);
-        records.push({ id: Date.now(), ...recordData });
+        // 同じ人・同じ日なら必ず同じドキュメントIDになるようにする
+        // (ドキュメントIDに "/" は使えないため日付の "/" を "-" に置換)
+        const docId = `${person.id}_${recordDate.replace(/\//g, '-')}`;
+        const recordRef = db.collection('records').doc(docId);
 
-        // 今月の出勤回数を計算
-        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-        const jstNow = new Date(utcMs + 9 * 60 * 60000);
-        const year = jstNow.getFullYear();
-        const month = jstNow.getMonth() + 1;
-
-        // 今月の記録を取得
-        const monthlyRecordsSnapshot = await db.collection('records').get();
-        const monthlyRecords = monthlyRecordsSnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(r => {
-            if (!r.date || r.personId !== person.id) return false;
-            const parts = r.date.split('/');
-            if (parts.length !== 3) return false;
-            return parseInt(parts[0]) === year && parseInt(parts[1]) === month;
-          });
-
-        // 同じ日付の記録を重複カウントしないように、日付ごとに最新の記録のみを使用
-        const dateMap = new Map();
-        monthlyRecords.forEach(record => {
-          const date = record.date;
-          if (!dateMap.has(date)) {
-            dateMap.set(date, record);
-          } else {
-            const existing = dateMap.get(date);
-            const existingTime = existing.timestamp?.toDate ? existing.timestamp.toDate().getTime() : 0;
-            const currentTime = record.timestamp?.toDate ? record.timestamp.toDate().getTime() : (record.id || 0);
-            if (currentTime > existingTime) {
-              dateMap.set(date, record);
-            }
+        // トランザクションで「存在しなければ書き込む」を原子的に実行する。
+        // これにより2台のスマホから同時に押しても、二重登録できなくなる。
+        await db.runTransaction(async (transaction) => {
+          const existing = await transaction.get(recordRef);
+          if (existing.exists) {
+            const err = new Error('already-recorded');
+            err.code = 'already-recorded';
+            throw err;
           }
+          transaction.set(recordRef, recordData);
         });
-        const monthlyCount = dateMap.size;
 
-        // 成功メッセージを更新
-        const monthlyCountMessage = document.getElementById('monthlyCountMessage');
-        monthlyCountMessage.textContent = `今月は${monthlyCount}回来ました`;
+        records.push({ id: docId, ...recordData });
 
-        successMessage.classList.remove('hidden');
-        this.reset();
-
-        setTimeout(() => {
-          successMessage.classList.add('hidden');
-        }, 5000);
+        // 記録成功。演出を再生する（フォームはリセットせず、続けて演出を楽しめるようにする）
+        // 登録したので最新の回数を取り直す(forceRefresh)
+        const monthlyMsg = await getMonthlyRouteMessage(person, true);
+        showSuccess('出勤を記録しました！', monthlyMsg);
       } catch (error) {
-        console.error('記録エラー:', error);
-        alert('記録に失敗しました');
+        if (error && error.code === 'already-recorded') {
+          // 別端末などで既に登録済みだった場合。メモリにも反映しつつ演出だけ再生する
+          if (!records.some(r => r.date === today && r.personId === person.id)) {
+            records.push({ id: `${person.id}_${today.replace(/\//g, '-')}`, personId: person.id, date: today });
+          }
+          const monthlyMsg = await getMonthlyRouteMessage(person, true);
+          showSuccess('本日は記録済みです', monthlyMsg);
+        } else {
+          console.error('記録エラー:', error);
+          alert('記録に失敗しました');
+        }
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = '出勤を記録';
